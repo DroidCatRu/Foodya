@@ -3,41 +3,42 @@ package ru.droidcat.foodya
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import ru.droidcat.foodya.ui.theme.FoodyaTheme
+import androidx.navigation.compose.rememberNavController
+import dagger.hilt.android.AndroidEntryPoint
+import ru.droidcat.core_navigation.NavigationFactory
+import ru.droidcat.core_navigation.NavigationManager
+import ru.droidcat.core_ui.theme.FoodyaTheme
+import ru.droidcat.core_utils.collectWithLifecycle
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var navigationFactories: @JvmSuppressWildcards Set<NavigationFactory>
+
+    @Inject
+    lateinit var navigationManager: NavigationManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             FoodyaTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Android")
-                }
+                val navController = rememberNavController()
+
+                NavigationHost(
+                    navController = navController,
+                    factories = navigationFactories
+                )
+
+                navigationManager
+                    .navigationEvent
+                    .collectWithLifecycle(
+                        key = navController
+                    ) {
+                        navController.navigate(it.destination, it.configuration)
+                    }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    FoodyaTheme {
-        Greeting("Android")
     }
 }

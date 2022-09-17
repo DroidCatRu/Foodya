@@ -14,3 +14,11 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Foodya"
 include ':app'
+include ':core-ui'
+include ':core-db-impl'
+include ':core-network-impl'
+include ':core-network-api'
+include ':feature-onboarding-impl'
+include ':feature-onboarding-api'
+include ':core-navigation'
+include ':core-utils'
