@@ -1,0 +1,13 @@
+query getMealPlan {
+    mealPlan {
+        meals {
+          meal
+          recipe {
+            id
+            databaseId
+            name
+            mainImage
+          }
+        }
+    }
+}

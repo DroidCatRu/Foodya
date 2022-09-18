@@ -1,0 +1,8 @@
+mutation updateMealPlanSettings ($calories: Int){
+  updateMealPlanSettings(
+    update: { calories: $calories }
+  ) {
+    success
+    message
+  }
+}

@@ -1,0 +1,15 @@
+mutation createUser ($name: String!, $email: String!){
+    createUser(
+        name: $name
+        email: $email
+      ) {
+        success
+        message
+        user {
+          name
+          databaseId
+          email
+          isActive
+        }
+      }
+}

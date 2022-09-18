@@ -1,0 +1,6 @@
+mutation generateMealPlan {
+    generateMealPlan {
+            success
+            message
+        }
+}

@@ -1,0 +1,9 @@
+mutation updateHydration ($date: Date!){
+  updateHydration(
+    date: $date
+    action: INCREASE
+  ) {
+    success
+    message
+  }
+}

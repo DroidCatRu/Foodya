@@ -1,0 +1,24 @@
+query getUserProfile {
+    myProfile {
+        id
+        age
+        birthdate
+        biologicalSex
+        activityLevel
+        startingWeight
+        targetWeight
+        height
+        goalsOn
+        programName
+        restrictions {
+          name
+        }
+        dailyCaloricIntakeGoal
+    	caloricDifference
+    	program {
+    	  databaseId,
+    	  name
+          author
+    	}
+    }
+}

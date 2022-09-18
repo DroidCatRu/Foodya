@@ -1,0 +1,6 @@
+mutation removeMealPlan{
+    removeMealPlan {
+        success
+        message
+    }
+}

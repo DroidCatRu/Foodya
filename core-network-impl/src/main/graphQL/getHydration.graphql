@@ -1,0 +1,11 @@
+query getHydration ($date: Date!){
+  hydration(
+    startDate: $date
+    endDate: $date)
+  {
+    isToday
+    quantity
+    date
+    goal
+  }
+}

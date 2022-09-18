@@ -1,0 +1,25 @@
+mutation setProfileMacroGoals(
+    $goalsOn: Boolean!,
+    $bioSex: BiologicalSex!,
+    $birthdate: Date!,
+    $height: Float!,
+    $weight: Float!,
+    $weeklyWeightGoal: WeeklyWeightGoal!,
+    $activityLevel: ActivityLevel!
+) {
+    profileMacroGoalsSettings(
+        goalsOn: $goalsOn
+        biologicalSex: $bioSex
+        birthdate: $birthdate
+        height: $height
+        startingWeight: $weight
+        targetWeight: $weight
+        weeklyWeightGoal: $weeklyWeightGoal
+        activityLevel: $activityLevel
+      ) {
+        success
+        tdee
+        cd
+        dcig
+      }
+}

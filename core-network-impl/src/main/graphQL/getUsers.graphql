@@ -1,0 +1,11 @@
+query getUsers {
+    users {
+        edges {
+            node {
+                name
+                databaseId
+                email
+            }
+        }
+    }
+}

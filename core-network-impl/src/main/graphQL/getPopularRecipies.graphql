@@ -1,0 +1,12 @@
+query getPopularRecipes {
+    popularRecipes {
+        edges {
+          node {
+            id
+            databaseId
+            name
+            mainImage
+          }
+        }
+    }
+}

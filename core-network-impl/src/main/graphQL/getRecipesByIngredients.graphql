@@ -1,0 +1,14 @@
+query getRecipesByIngredients ($mustIngredients: [String]!){
+    searchRecipesByIngredients(
+        mustIngredients: $mustIngredients
+      ) {
+        edges {
+          node {
+            id
+            databaseId
+            name
+            mainImage
+          }
+        }
+    }
+}
