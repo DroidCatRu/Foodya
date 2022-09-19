@@ -1,0 +1,10 @@
+query getAllRestrictions{
+  restrictions{
+    edges{
+      node{
+        id
+        name
+      }
+    }
+  }
+}

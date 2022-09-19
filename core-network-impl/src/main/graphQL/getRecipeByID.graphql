@@ -1,5 +1,6 @@
 query getRecipeByID ($recipe_id: ID!){
     recipe(id: $recipe_id) {
+        databaseId
         name
         mainImage
         totalTime

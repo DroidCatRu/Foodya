@@ -1,0 +1,7 @@
+mutation addUserRestrictions($restrictions:[ID]){
+  profileRestrictionsUpdate(
+    restrictions: $restrictions) {
+    success
+    message
+  }
+}

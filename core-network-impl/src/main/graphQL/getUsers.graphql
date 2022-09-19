@@ -1,11 +1,12 @@
-query getUsers {
-    users {
-        edges {
-            node {
-                name
-                databaseId
-                email
+    query getUsers {
+        users {
+            edges {
+                node {
+                    id
+                    databaseId
+                    name
+                    email
+                }
             }
         }
     }
-}
