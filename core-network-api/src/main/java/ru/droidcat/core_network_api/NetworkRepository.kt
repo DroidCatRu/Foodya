@@ -10,7 +10,7 @@ import ru.droidcat.core_network_api.users.UserGender
 import java.time.LocalDate
 
 sealed class MutationResult {
-    object SUCCESS : MutationResult()
+    data class SUCCESS(val data: Any? = null) : MutationResult()
     sealed class ERROR : MutationResult() {
         sealed class AUTH : ERROR() {
             object USER_ALREADY_EXISTS : AUTH()

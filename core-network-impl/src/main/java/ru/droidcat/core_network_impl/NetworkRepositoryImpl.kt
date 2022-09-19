@@ -82,11 +82,10 @@ class NetworkRepositoryImpl @Inject constructor(
                 .getJSONObject("user")
 
             val databaseId = userJsonObject.getString("databaseId")
-            //ToDo Сохранить userId в локальное хранилище?
 
             firebaseDb.reference.child("users").child(user.uid).setValue(databaseId)
 
-            return MutationResult.SUCCESS
+            return MutationResult.SUCCESS(databaseId)
         } else {
             val errorMessage = result.errors!![0].message
             return when(errorMessage){
@@ -113,7 +112,7 @@ class NetworkRepositoryImpl @Inject constructor(
             )
 
         return if (firebaseAuthResult?.user != null) {
-            MutationResult.SUCCESS
+            MutationResult.SUCCESS()
         } else {
             MutationResult.ERROR.AUTH.UNKNOWN
         }
@@ -132,7 +131,7 @@ class NetworkRepositoryImpl @Inject constructor(
 
             firebaseDb.reference.child("users").child(currentUser.uid).removeValue().await()
 
-            return MutationResult.SUCCESS
+            return MutationResult.SUCCESS()
         } else {
             val errorMessage = result.errors!![0].message
             return when(errorMessage){
@@ -152,7 +151,7 @@ class NetworkRepositoryImpl @Inject constructor(
             .execute()
 
         if (result.data != null){
-            return MutationResult.SUCCESS
+            return MutationResult.SUCCESS()
         } else {
             val errorMessage = result.errors!![0].message
             when(errorMessage){
@@ -363,7 +362,7 @@ class NetworkRepositoryImpl @Inject constructor(
             .execute()
 
         if (result.data != null){
-            return MutationResult.SUCCESS
+            return MutationResult.SUCCESS()
         } else {
             val errorMessage = result.errors!![0].message
             when(errorMessage){
@@ -383,7 +382,7 @@ class NetworkRepositoryImpl @Inject constructor(
             .execute()
 
         if (result.data != null){
-            return MutationResult.SUCCESS
+            return MutationResult.SUCCESS()
         } else {
             val errorMessage = result.errors!![0].message
             when(errorMessage){
@@ -403,7 +402,7 @@ class NetworkRepositoryImpl @Inject constructor(
             .execute()
 
         if (result.data != null){
-            return MutationResult.SUCCESS
+            return MutationResult.SUCCESS()
         } else {
             val errorMessage = result.errors!![0].message
             when(errorMessage){
@@ -438,7 +437,7 @@ class NetworkRepositoryImpl @Inject constructor(
             .execute()
 
         if (result.data != null){
-            return MutationResult.SUCCESS
+            return MutationResult.SUCCESS()
         } else {
             val errorMessage = result.errors!![0].message
             when(errorMessage){
@@ -517,7 +516,7 @@ class NetworkRepositoryImpl @Inject constructor(
             .execute()
 
         if (result.data != null){
-            return MutationResult.SUCCESS
+            return MutationResult.SUCCESS()
         } else {
             val errorMessage = result.errors!![0].message
             when(errorMessage){
