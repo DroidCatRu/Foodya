@@ -3,6 +3,8 @@ package ru.droidcat.foodya
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.material3.Surface
+import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import ru.droidcat.core_navigation.NavigationFactory
@@ -22,21 +24,40 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         setContent {
             FoodyaTheme {
                 val navController = rememberNavController()
 
-                NavigationHost(
-                    navController = navController,
-                    factories = navigationFactories
-                )
+                Surface {
+                    NavigationHost(
+                        navController = navController,
+                        factories = navigationFactories
+                    )
+                }
 
                 navigationManager
                     .navigationEvent
                     .collectWithLifecycle(
                         key = navController
-                    ) {
-                        navController.navigate(it.destination, it.configuration)
+                    ) { command ->
+                        if (command.navigateBack) {
+                            if (command.destination != null) {
+                                navController.popBackStack(
+                                    route = command.destination!!,
+                                    inclusive = false
+                                )
+                            } else {
+                                navController.popBackStack()
+                            }
+                        } else if (command.destination != null) {
+                            navController.navigate(
+                                command.destination!!,
+                                command.configuration
+                            )
+                        }
                     }
             }
         }

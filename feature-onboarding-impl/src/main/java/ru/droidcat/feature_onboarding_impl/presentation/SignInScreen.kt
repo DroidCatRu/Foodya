@@ -9,13 +9,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import ru.droidcat.core_navigation.NavigationCommand
+import ru.droidcat.core_navigation.NavigateBack
 import ru.droidcat.core_navigation.NavigationManager
-import ru.droidcat.feature_onboarding_impl.OnboardingAuth
-import ru.droidcat.feature_onboarding_impl.OnboardingGreeting
 
 @Composable
-fun OnboardingAuthScreen(
+fun OnboardingSignInScreen(
     navigationManager: NavigationManager
 ) {
     Column(
@@ -25,15 +23,11 @@ fun OnboardingAuthScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Auth screen"
+            text = "Sign In screen"
         )
         Button(
             onClick = {
-                navigationManager.navigate(
-                    object: NavigationCommand {
-                        override val destination = OnboardingGreeting.route
-                    }
-                )
+                navigationManager.navigate(NavigateBack)
             }
         ) {
             Text("Go back")

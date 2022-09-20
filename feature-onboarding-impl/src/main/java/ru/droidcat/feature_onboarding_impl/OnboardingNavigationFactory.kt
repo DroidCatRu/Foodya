@@ -6,8 +6,9 @@ import androidx.navigation.navigation
 import ru.droidcat.core_navigation.NavigationDestination
 import ru.droidcat.core_navigation.NavigationFactory
 import ru.droidcat.core_navigation.NavigationManager
-import ru.droidcat.feature_onboarding_impl.presentation.OnboardingAuthScreen
 import ru.droidcat.feature_onboarding_impl.presentation.OnboardingGreetingScreen
+import ru.droidcat.feature_onboarding_impl.presentation.OnboardingSignInScreen
+import ru.droidcat.feature_onboarding_impl.presentation.OnboardingSignUpScreen
 import javax.inject.Inject
 
 class OnboardingNavigationFactory @Inject constructor(
@@ -21,16 +22,17 @@ class OnboardingNavigationFactory @Inject constructor(
             composable(route = OnboardingGreeting.route) {
                 OnboardingGreetingScreen(navigationManager)
             }
-            composable(route = OnboardingAuth.route) {
-                OnboardingAuthScreen(navigationManager)
+            composable(route = OnboardingSignIn.route) {
+                OnboardingSignInScreen(navigationManager)
+            }
+            composable(route = OnboardingSignUp.route) {
+                OnboardingSignUpScreen(navigationManager)
             }
         }
-//        builder.composable(OnboardingDestination.route) {
-//            OnboardingScreen()
-//        }
     }
 }
 
 object OnboardingDestination : NavigationDestination("onboardingDestination")
 object OnboardingGreeting : NavigationDestination("onboardingGreeting")
-object OnboardingAuth : NavigationDestination("onboardingAuth")
+object OnboardingSignIn : NavigationDestination("onboardingSignIn")
+object OnboardingSignUp : NavigationDestination("onboardingSignUp")

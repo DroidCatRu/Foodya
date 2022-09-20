@@ -33,6 +33,7 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion compose_compiler_version
     }
+    namespace 'ru.droidcat.core_ui'
 }
 
 dependencies {
@@ -41,6 +42,8 @@ dependencies {
 
     api "com.google.android.material:material:1.6.1"
     api "androidx.compose.material3:material3:1.0.0-beta02"
+
+    api "androidx.constraintlayout:constraintlayout-compose:1.0.1"
 
     api "androidx.activity:activity-compose:1.5.1"
 

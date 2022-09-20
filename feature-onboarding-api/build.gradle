@@ -29,6 +29,7 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    namespace 'ru.droidcat.feature_onboarding_api'
 }
 
 dependencies {
