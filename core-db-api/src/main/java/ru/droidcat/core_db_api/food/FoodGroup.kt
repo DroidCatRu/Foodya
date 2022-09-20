@@ -1,0 +1,26 @@
+package ru.droidcat.core_db_api.food
+
+enum class FoodGroup {
+    HERBS_AND_SPICES,
+    VEGETABLES,
+    FRUITS,
+    NUTS,
+    CEREALS_AND_CEREAL_PRODUCTS,
+    PULSES,
+    TEAS,
+    GOURDS,
+    COFFEE_AND_COFFEE_PRODUCTS,
+    SOY,
+    COCOA_AND_COCOA_PRODUCTS,
+    BEVERAGES,
+    AQUATIC_FOODS,
+    ANIMAL_FOODS,
+    MILK_AND_MILK_PRODUCTS,
+    EGGS,
+    CONFECTIONERIES,
+    BAKING_GOODS,
+    DISHES,
+    SNACK_FOODS,
+    BABY_FOODS,
+    FATS_AND_OILS
+}

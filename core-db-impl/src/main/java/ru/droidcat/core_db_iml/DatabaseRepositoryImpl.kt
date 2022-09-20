@@ -1,12 +1,17 @@
 package ru.droidcat.core_db_iml
 
 import android.content.SharedPreferences
+import org.json.JSONArray
 import ru.droidcat.core_db_api.DatabaseRepository
+import ru.droidcat.core_db_api.food.Food
+import ru.droidcat.core_db_api.food.FoodCategory
+import ru.droidcat.core_db_api.food.FoodGroup
+import java.io.File
 import javax.inject.Inject
 
 class DatabaseRepositoryImpl @Inject constructor(
     private val sharedPref: SharedPreferences
-    ) : DatabaseRepository {
+) : DatabaseRepository {
 
     private val USER_ID_KEY = "USER_ID_KEY"
 
@@ -26,5 +31,66 @@ class DatabaseRepositoryImpl @Inject constructor(
             .edit()
             .clear()
             .apply()
+    }
+
+
+    override suspend fun getAllFoods(): List<Food> {
+        return JsonHandler.getFoodList()
+    }
+
+
+    override suspend fun getFoodByCategory(foodCategory: FoodCategory): List<Food> {
+        return JsonHandler.getFoodList().filter { food ->
+            food.category == foodCategory
+        }
+    }
+
+
+    override suspend fun getFoodByGroup(foodGroup: FoodGroup): List<Food> {
+        return JsonHandler.getFoodList().filter { food ->
+            food.group == foodGroup
+        }
+    }
+
+    override suspend fun getFoodByName(foodName: String): Food? {
+        return JsonHandler.getFoodList().find { food ->
+            food.name == foodName
+        }
+    }
+
+    object JsonHandler {
+        private const val filePath = "src/main/food-db/Food.json"
+
+        private var foodList: List<Food>? = null
+
+        fun getFoodList(): List<Food> {
+            if (foodList == null) {
+                val file = File(filePath)
+
+                val foodJsonArray =
+                    JSONArray(file.bufferedReader().use { reader -> reader.readText() })
+                val foodList = ArrayList<Food>()
+
+                for (i in 0..foodJsonArray.length()) {
+                    foodList.add(
+                        Food(
+                            foodJsonArray.getJSONObject(i).getString("name"),
+                            foodJsonArray.getJSONObject(i).getString("description"),
+                            FoodGroup.valueOf(
+                                foodJsonArray.getJSONObject(i).getString("food_group")
+                                    .uppercase()
+                                    .replace(" ", "_")
+                            ),
+                            FoodCategory.valueOf(
+                                foodJsonArray.getJSONObject(i).getString("category").uppercase()
+                                    .replace(" ", "_")
+                            )
+                        )
+                    )
+
+                }
+            }
+            return foodList!!
+        }
     }
 }
