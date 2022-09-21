@@ -7,6 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import ru.droidcat.core_db_api.DatabaseRepository
 import ru.droidcat.core_network_api.NetworkRepository
 import ru.droidcat.feature_onboarding_api.usecase.CheckUserSignedUseCase
+import ru.droidcat.feature_onboarding_api.usecase.SignInUserUseCase
 import ru.droidcat.feature_onboarding_api.usecase.SignUpUserUseCase
 import javax.inject.Singleton
 
@@ -21,6 +22,15 @@ object OnboardingModule {
         dbRepository: DatabaseRepository
     ): SignUpUserUseCase {
         return SignUpUserUseCase(networkRepository, dbRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSignInUserUseCase(
+        networkRepository: NetworkRepository,
+        dbRepository: DatabaseRepository
+    ): SignInUserUseCase {
+        return SignInUserUseCase(networkRepository, dbRepository)
     }
 
     @Provides
