@@ -36,6 +36,8 @@ dependencies {
 
     implementation project(":core-network-api")
     implementation project(":core-network-impl")
+    implementation project(":core-db-api")
+    implementation project(":core-db-impl")
 
     // Hilt
     implementation "com.google.dagger:hilt-android:2.43.2"

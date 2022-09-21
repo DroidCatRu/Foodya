@@ -1,4 +1,4 @@
-package ru.droidcat.core_db_iml
+package ru.droidcat.core_db_impl
 
 import android.content.SharedPreferences
 import org.json.JSONArray

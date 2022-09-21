@@ -1,4 +1,4 @@
-package ru.droidcat.core_db_iml.di
+package ru.droidcat.core_db_impl.di
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -11,7 +11,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object SharedPrefModule {
+object DatabaseModule {
 
     private const val PREF_NAME = "ru.droidcat.foodya.pref"
 

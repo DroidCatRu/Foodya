@@ -9,12 +9,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalConfiguration
@@ -23,84 +21,112 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.coerceAtMost
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.*
 import ru.droidcat.core_navigation.NavigateBack
 import ru.droidcat.core_navigation.NavigationManager
 import ru.droidcat.core_ui.components.buttons.FoodyaFilledButton
+import kotlin.math.roundToInt
 
 @OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class
+    ExperimentalMaterial3Api::class,
+    ExperimentalLayoutApi::class
 )
 @Composable
 fun OnboardingSignUpScreen(
     navigationManager: NavigationManager
 ) {
 
-    var nameValue by rememberSaveable { mutableStateOf("") }
-    var emailValue by rememberSaveable { mutableStateOf("") }
-    var passwordValue by rememberSaveable { mutableStateOf("") }
-
     val focusManager = LocalFocusManager.current
+    val scrollState = rememberScrollState()
 
-    var nameFieldOffset by remember { mutableStateOf(Offset.Zero) }
-    var emailFieldOffset by remember { mutableStateOf(Offset.Zero) }
-    var passwordFieldOffset by remember { mutableStateOf(Offset.Zero) }
+    val scope = rememberCoroutineScope()
+    var scrollJob by remember { mutableStateOf<Job?>(null) }
 
-    var nameFieldFocused by remember { mutableStateOf(false) }
-    var emailFieldFocused by remember { mutableStateOf(false) }
-    var passwordFieldFocused by remember { mutableStateOf(false) }
+    var nameTextField by remember { mutableStateOf<TextField>(TextField.NameField()) }
+    var emailTextField by remember { mutableStateOf<TextField>(TextField.EmailField()) }
+    var passwordTextField by remember { mutableStateOf<TextField>(TextField.PasswordField()) }
 
-    var focusChanged by remember { mutableStateOf(false) }
-    var done by remember { mutableStateOf(false) }
+    var focusState by remember { mutableStateOf<FocusState>(FocusState.FocusEmpty) }
+    var imeState by remember { mutableStateOf<ImeState>(ImeState.Hidden) }
+    var paddingApplied by remember { mutableStateOf<TextField?>(null) }
 
-    if (focusChanged) {
-        done = false
-        focusChanged = false
-    }
+    var totalOffset by remember { mutableStateOf(0.dp) }
 
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
-    val topOffset =
-        if (nameFieldFocused) {
-            with(LocalDensity.current) {
-                nameFieldOffset.y.toDp()
+    imeState = if (WindowInsets.isImeVisible) {
+        ImeState.Open(WindowInsets.ime.asPaddingValues().calculateBottomPadding())
+    } else {
+        ImeState.Hidden
+    }
+
+    when (imeState) {
+        is ImeState.Open -> {
+            if (focusState is FocusState.Focused) {
+                with(LocalDensity.current) {
+                    val textField = (focusState as FocusState.Focused).field
+                    val topOffset = (textField.topOffset + textField.size).toDp()
+                    val bottomOffset = screenHeight - topOffset
+
+                    if (paddingApplied == null ||
+                        textField.javaClass != paddingApplied!!.javaClass
+                    ) {
+                        totalOffset =
+                            (bottomOffset - (imeState as ImeState.Open).size
+                                    + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                                    + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+                                    - 4.dp
+                                    ).coerceAtMost(0.dp)
+
+                        Log.d("TextField", textField.javaClass.simpleName)
+                        Log.d("Offset", "Top: ${topOffset}")
+                        Log.d("Offset", "Bottom: ${bottomOffset}")
+                        Log.d("Offset", "Total: ${totalOffset}")
+
+                        paddingApplied = textField
+
+                        scrollJob?.cancel()
+                        scrollJob = scope.launch {
+                            Log.d("Scroll", "To: ${scrollState.value - totalOffset.toPx().toInt()}")
+                            scrollState.animateScrollTo(
+                                scrollState.value - totalOffset.toPx().toInt()
+                            )
+                        }
+                    }
+                }
             }
-        } else if (emailFieldFocused) {
-            with(LocalDensity.current) {
-                emailFieldOffset.y.toDp()
-            }
-        } else if (passwordFieldFocused) {
-            with(LocalDensity.current) {
-                passwordFieldOffset.y.toDp()
-            }
-        } else {
-            screenHeight
         }
-
-    val bottomOffset = screenHeight - topOffset
-
-    val focused = WindowInsets.isImeVisible &&
-            (nameFieldFocused || emailFieldFocused || passwordFieldFocused)
-
-    val totalOffset =
-        if (!focused && !done) {
-            0.dp
-        } else if (!focused && done) {
-            done = false
-            0.dp
-        } else {
-            done = true
-            (bottomOffset - WindowInsets.ime.asPaddingValues().calculateBottomPadding() +
-                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                    WindowInsets.statusBars.asPaddingValues().calculateTopPadding() - 4.dp)
-                .coerceAtMost(0.dp)
+        is ImeState.Hidden -> {
+            if (paddingApplied != null) {
+                paddingApplied = null
+                with(LocalDensity.current) {
+                    scope.launch {
+                        scrollState.animateScrollTo(
+                            scrollState.value + totalOffset.toPx().toInt()
+                        )
+                    }
+                }
+            }
         }
+    }
+
+
+//            totalOffset =
+//                (WindowInsets.ime.asPaddingValues().calculateBottomPadding() - bottomOffset
+////                        + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+////                        WindowInsets.statusBars.asPaddingValues().calculateTopPadding() - 4.dp
+//
+//                        ).coerceAtLeast(0.dp)
+
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(scrollState),
         contentAlignment = Alignment.Center
     ) {
 
@@ -111,10 +137,15 @@ fun OnboardingSignUpScreen(
                     WindowInsets.systemBars.asPaddingValues()
                 )
                 .padding(
-                    horizontal = 16.dp
+                    bottom =
+                    if (paddingApplied != null) {
+                        (0.dp - totalOffset).coerceAtLeast(0.dp)
+                    } else {
+                        0.dp
+                    }
                 )
-                .offset(
-                    y = totalOffset
+                .padding(
+                    horizontal = 16.dp
                 ),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = spacedBy(8.dp)
@@ -135,18 +166,25 @@ fun OnboardingSignUpScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .onGloballyPositioned { coordinates ->
-                        if (!nameFieldFocused) {
-                            nameFieldOffset = coordinates.positionInRoot() +
-                                    Offset(0f, coordinates.size.height.toFloat())
+                        if (focusState != FocusState.Focused(nameTextField) &&
+                            imeState is ImeState.Hidden
+                        ) {
+                            nameTextField = (nameTextField as TextField.NameField).copy(
+                                topOffset = coordinates.positionInRoot().y.roundToInt(),
+                                size = coordinates.size.height
+                            )
                         }
                     }
                     .onFocusChanged {
-                        nameFieldFocused = (it.isFocused || it.hasFocus)
-                        focusChanged = true
+                        if (it.isFocused || it.hasFocus) {
+                            focusState = FocusState.Focused(nameTextField)
+                        }
                     },
-                value = nameValue,
+                value = nameTextField.value,
                 onValueChange = {
-                    nameValue = it
+                    nameTextField = (nameTextField as TextField.NameField).copy(
+                        value = it
+                    )
                 },
                 label = {
                     Text("Имя")
@@ -165,18 +203,25 @@ fun OnboardingSignUpScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .onGloballyPositioned { coordinates ->
-                        if (!emailFieldFocused) {
-                            emailFieldOffset = coordinates.positionInRoot() +
-                                    Offset(0f, coordinates.size.height.toFloat())
+                        if (focusState != FocusState.Focused(emailTextField) &&
+                            imeState is ImeState.Hidden
+                        ) {
+                            emailTextField = (emailTextField as TextField.EmailField).copy(
+                                topOffset = coordinates.positionInRoot().y.roundToInt(),
+                                size = coordinates.size.height
+                            )
                         }
                     }
                     .onFocusChanged {
-                        emailFieldFocused = (it.isFocused || it.hasFocus)
-                        focusChanged = true
+                        if (it.isFocused || it.hasFocus) {
+                            focusState = FocusState.Focused(emailTextField)
+                        }
                     },
-                value = emailValue,
+                value = emailTextField.value,
                 onValueChange = {
-                    emailValue = it
+                    emailTextField = (emailTextField as TextField.EmailField).copy(
+                        value = it
+                    )
                 },
                 label = {
                     Text("email")
@@ -195,20 +240,25 @@ fun OnboardingSignUpScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .onGloballyPositioned { coordinates ->
-                        if (!passwordFieldFocused) {
-                            passwordFieldOffset = coordinates.positionInRoot() +
-                                    Offset(0f, coordinates.size.height.toFloat())
-                            Log.d("Offset pos", "$passwordFieldOffset")
+                        if (focusState != FocusState.Focused(passwordTextField) &&
+                            imeState is ImeState.Hidden
+                        ) {
+                            passwordTextField = (passwordTextField as TextField.PasswordField).copy(
+                                topOffset = coordinates.positionInRoot().y.roundToInt(),
+                                size = coordinates.size.height
+                            )
                         }
                     }
                     .onFocusChanged {
-                        passwordFieldFocused = (it.isFocused || it.hasFocus)
-                        Log.d("Offset focused", "$passwordFieldOffset")
-                        focusChanged = true
+                        if (it.isFocused || it.hasFocus) {
+                            focusState = FocusState.Focused(passwordTextField)
+                        }
                     },
-                value = passwordValue,
+                value = passwordTextField.value,
                 onValueChange = {
-                    passwordValue = it
+                    passwordTextField = (passwordTextField as TextField.PasswordField).copy(
+                        value = it
+                    )
                 },
                 label = {
                     Text("Пароль")
@@ -242,4 +292,38 @@ private fun navigateBack(navigationManager: NavigationManager) {
 
 private fun createUser(navigationManager: NavigationManager) {
     navigateBack(navigationManager)
+}
+
+sealed class TextField(
+    open val value: String,
+    open val topOffset: Int,
+    open val size: Int
+) {
+    data class NameField(
+        override val value: String = "",
+        override val topOffset: Int = 0,
+        override val size: Int = 0
+    ) : TextField(value, topOffset, size)
+
+    data class EmailField(
+        override val value: String = "",
+        override val topOffset: Int = 0,
+        override val size: Int = 0
+    ) : TextField(value, topOffset, size)
+
+    data class PasswordField(
+        override val value: String = "",
+        override val topOffset: Int = 0,
+        override val size: Int = 0
+    ) : TextField(value, topOffset, size)
+}
+
+sealed class FocusState {
+    data class Focused(val field: TextField) : FocusState()
+    object FocusEmpty : FocusState()
+}
+
+sealed class ImeState {
+    data class Open(val size: Dp) : ImeState()
+    object Hidden : ImeState()
 }
