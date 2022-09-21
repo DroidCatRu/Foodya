@@ -6,7 +6,7 @@ import ru.droidcat.core_db_api.food.FoodGroup
 
 interface DatabaseRepository {
 
-    suspend fun saveUserDatabaseId(databaseId: String)
+    suspend fun saveUserDatabaseId(databaseId: String): Boolean
 
     suspend fun getUserDatabaseId() : String?
 

@@ -15,11 +15,11 @@ class DatabaseRepositoryImpl @Inject constructor(
 
     private val USER_ID_KEY = "USER_ID_KEY"
 
-    override suspend fun saveUserDatabaseId(databaseId: String) {
-        sharedPref
+    override suspend fun saveUserDatabaseId(databaseId: String): Boolean {
+        return sharedPref
             .edit()
             .putString(USER_ID_KEY, databaseId)
-            .apply()
+            .commit()
     }
 
     override suspend fun getUserDatabaseId(): String? {
