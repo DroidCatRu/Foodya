@@ -10,7 +10,7 @@ interface DatabaseRepository {
 
     suspend fun getUserDatabaseId() : String?
 
-    suspend fun clearLocalStorage()
+    suspend fun clearLocalStorage() : Boolean
 
 
     suspend fun getAllFoods() : List<Food>

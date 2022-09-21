@@ -26,11 +26,11 @@ class DatabaseRepositoryImpl @Inject constructor(
         return sharedPref.getString(USER_ID_KEY, null)
     }
 
-    override suspend fun clearLocalStorage() {
-        sharedPref
+    override suspend fun clearLocalStorage(): Boolean {
+        return sharedPref
             .edit()
             .clear()
-            .apply()
+            .commit()
     }
 
 

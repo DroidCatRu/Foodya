@@ -3,6 +3,7 @@ package ru.droidcat.feature_onboarding_api.usecase
 import ru.droidcat.core_db_api.DatabaseRepository
 import ru.droidcat.core_network_api.MutationResult
 import ru.droidcat.core_network_api.NetworkRepository
+import ru.droidcat.feature_onboarding_api.SignResults
 
 class SignInUserUseCase(
     private val networkRepository: NetworkRepository,
@@ -11,33 +12,20 @@ class SignInUserUseCase(
     suspend operator fun invoke(
         email: String,
         password: String
-    ): SignInResult {
+    ): SignResults {
         val networkResult = networkRepository.signInUserEmailPassword(email, password)
 
         if (networkResult is MutationResult.ERROR) {
-            return SignInResult.ERROR.UNKNOWN
+            return SignResults.ERROR.UNKNOWN
         }
 
         val dbResult =
             dbRepository.saveUserDatabaseId((networkResult as MutationResult.SUCCESS).data.toString())
 
         if (!dbResult) {
-            return SignInResult.ERROR.DB_WRITE_ERROR
+            return SignResults.DB.WRITE_ERROR
         }
 
-        return SignInResult.SUCCESS
-    }
-}
-
-sealed class SignInResult {
-    object SUCCESS : SignInResult()
-    sealed class ERROR : SignInResult() {
-        object USER_ALREADY_EXISTS : ERROR()
-        object USER_ALREADY_SIGNED_IN : ERROR()
-        object USER_NOT_SIGNED_IN : ERROR()
-        object INVALID_CREDENTIALS : ERROR()
-        object WEAK_PASSWORD : ERROR()
-        object UNKNOWN : ERROR()
-        object DB_WRITE_ERROR : ERROR()
+        return SignResults.SUCCESS
     }
 }
