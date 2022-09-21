@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.coerceAtMost
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.*
 import ru.droidcat.core_navigation.NavigateBack
 import ru.droidcat.core_navigation.NavigationManager
@@ -37,8 +38,11 @@ import kotlin.math.roundToInt
 )
 @Composable
 fun OnboardingSignUpScreen(
-    navigationManager: NavigationManager
+    navigationManager: NavigationManager,
+    viewModel: SignUpScreenViewModel = hiltViewModel()
 ) {
+
+    val screenState = viewModel.screenState.collectAsState()
 
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
@@ -114,15 +118,6 @@ fun OnboardingSignUpScreen(
         }
     }
 
-
-//            totalOffset =
-//                (WindowInsets.ime.asPaddingValues().calculateBottomPadding() - bottomOffset
-////                        + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-////                        WindowInsets.statusBars.asPaddingValues().calculateTopPadding() - 4.dp
-//
-//                        ).coerceAtLeast(0.dp)
-
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -180,11 +175,9 @@ fun OnboardingSignUpScreen(
                             focusState = FocusState.Focused(nameTextField)
                         }
                     },
-                value = nameTextField.value,
+                value = screenState.value.nameFieldValue,
                 onValueChange = {
-                    nameTextField = (nameTextField as TextField.NameField).copy(
-                        value = it
-                    )
+                    viewModel.inputName(it)
                 },
                 label = {
                     Text("Имя")
@@ -217,11 +210,9 @@ fun OnboardingSignUpScreen(
                             focusState = FocusState.Focused(emailTextField)
                         }
                     },
-                value = emailTextField.value,
+                value = screenState.value.emailFieldValue,
                 onValueChange = {
-                    emailTextField = (emailTextField as TextField.EmailField).copy(
-                        value = it
-                    )
+                    viewModel.inputEmail(it)
                 },
                 label = {
                     Text("email")
@@ -254,11 +245,9 @@ fun OnboardingSignUpScreen(
                             focusState = FocusState.Focused(passwordTextField)
                         }
                     },
-                value = passwordTextField.value,
+                value = screenState.value.passwordFieldValue,
                 onValueChange = {
-                    passwordTextField = (passwordTextField as TextField.PasswordField).copy(
-                        value = it
-                    )
+                    viewModel.inputPassword(it)
                 },
                 label = {
                     Text("Пароль")
@@ -270,14 +259,14 @@ fun OnboardingSignUpScreen(
                     imeAction = ImeAction.Done,
                 ),
                 keyboardActions = KeyboardActions(
-                    onDone = { createUser(navigationManager) }
+                    onDone = { createUser(viewModel, navigationManager) }
                 )
             )
 
             FoodyaFilledButton(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
-                    createUser(navigationManager)
+                    createUser(viewModel, navigationManager)
                 }
             ) {
                 Text("Создать аккаунт")
@@ -290,32 +279,31 @@ private fun navigateBack(navigationManager: NavigationManager) {
     navigationManager.navigate(NavigateBack)
 }
 
-private fun createUser(navigationManager: NavigationManager) {
-    navigateBack(navigationManager)
+private fun createUser(
+    viewModel: SignUpScreenViewModel,
+    navigationManager: NavigationManager) {
+    viewModel.signUpUser()
+//    navigateBack(navigationManager)
 }
 
 sealed class TextField(
-    open val value: String,
     open val topOffset: Int,
     open val size: Int
 ) {
     data class NameField(
-        override val value: String = "",
         override val topOffset: Int = 0,
         override val size: Int = 0
-    ) : TextField(value, topOffset, size)
+    ) : TextField(topOffset, size)
 
     data class EmailField(
-        override val value: String = "",
         override val topOffset: Int = 0,
         override val size: Int = 0
-    ) : TextField(value, topOffset, size)
+    ) : TextField(topOffset, size)
 
     data class PasswordField(
-        override val value: String = "",
         override val topOffset: Int = 0,
         override val size: Int = 0
-    ) : TextField(value, topOffset, size)
+    ) : TextField(topOffset, size)
 }
 
 sealed class FocusState {

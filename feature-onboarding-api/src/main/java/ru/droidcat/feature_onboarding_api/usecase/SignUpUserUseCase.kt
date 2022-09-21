@@ -24,6 +24,6 @@ class SignUpUserUseCase(
         val dbResult =
             dbRepository.saveUserDatabaseId((networkResult as MutationResult.SUCCESS).data.toString())
 
-        return if (dbResult) SignResults.SUCCESS else SignResults.DB.WRITE_ERROR
+        return if (dbResult) SignResults.SUCCESS else SignResults.ERROR.DB.WRITE_ERROR
     }
 }

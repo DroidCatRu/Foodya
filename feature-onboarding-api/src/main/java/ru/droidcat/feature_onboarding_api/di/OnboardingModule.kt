@@ -17,9 +17,10 @@ object OnboardingModule {
     @Provides
     @Singleton
     fun provideSignUpUserUseCase(
-        networkRepository: NetworkRepository
+        networkRepository: NetworkRepository,
+        dbRepository: DatabaseRepository
     ): SignUpUserUseCase {
-        return SignUpUserUseCase(networkRepository)
+        return SignUpUserUseCase(networkRepository, dbRepository)
     }
 
     @Provides

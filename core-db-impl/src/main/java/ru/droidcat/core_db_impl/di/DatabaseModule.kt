@@ -2,16 +2,19 @@ package ru.droidcat.core_db_impl.di
 
 import android.content.Context
 import android.content.SharedPreferences
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import ru.droidcat.core_db_api.DatabaseRepository
+import ru.droidcat.core_db_impl.DatabaseRepositoryImpl
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object DatabaseModule {
+internal object SharedPrefModule {
 
     private const val PREF_NAME = "ru.droidcat.foodya.pref"
 
@@ -21,5 +24,19 @@ object DatabaseModule {
         @ApplicationContext context: Context
     ): SharedPreferences {
         return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    }
+}
+
+@Module(includes = [DatabaseModule.BindsModule::class])
+@InstallIn(SingletonComponent::class)
+object DatabaseModule {
+
+    @Module
+    @InstallIn(SingletonComponent::class)
+    interface BindsModule {
+
+        @Binds
+        @Singleton
+        fun bindDatabaseRepository(impl: DatabaseRepositoryImpl): DatabaseRepository
     }
 }

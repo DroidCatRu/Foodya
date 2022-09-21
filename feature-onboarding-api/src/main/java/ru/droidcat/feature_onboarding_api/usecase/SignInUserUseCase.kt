@@ -23,7 +23,7 @@ class SignInUserUseCase(
             dbRepository.saveUserDatabaseId((networkResult as MutationResult.SUCCESS).data.toString())
 
         if (!dbResult) {
-            return SignResults.DB.WRITE_ERROR
+            return SignResults.ERROR.DB.WRITE_ERROR
         }
 
         return SignResults.SUCCESS
