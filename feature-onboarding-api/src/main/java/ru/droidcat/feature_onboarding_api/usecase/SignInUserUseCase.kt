@@ -13,25 +13,31 @@ class SignInUserUseCase(
         password: String
     ): SignInResult {
         val networkResult = networkRepository.signInUserEmailPassword(email, password)
-        when (networkResult) {
-            is MutationResult.SUCCESS -> {
-                dbRepository.saveUserDatabaseId(networkResult.data.toString())
-            }
-            else -> {
 
-            }
+        if (networkResult is MutationResult.ERROR) {
+            return SignInResult.ERROR.UNKNOWN
         }
+
+        val dbResult =
+            dbRepository.saveUserDatabaseId((networkResult as MutationResult.SUCCESS).data.toString())
+
+        if (!dbResult) {
+            return SignInResult.ERROR.DB_WRITE_ERROR
+        }
+
+        return SignInResult.SUCCESS
     }
 }
 
 sealed class SignInResult {
     object SUCCESS : SignInResult()
     sealed class ERROR : SignInResult() {
-            object USER_ALREADY_EXISTS : ERROR()
-            object USER_ALREADY_SIGNED_IN : ERROR()
-            object USER_NOT_SIGNED_IN : ERROR()
-            object INVALID_CREDENTIALS : ERROR()
-            object WEAK_PASSWORD : ERROR()
-            object UNKNOWN : ERROR()
+        object USER_ALREADY_EXISTS : ERROR()
+        object USER_ALREADY_SIGNED_IN : ERROR()
+        object USER_NOT_SIGNED_IN : ERROR()
+        object INVALID_CREDENTIALS : ERROR()
+        object WEAK_PASSWORD : ERROR()
+        object UNKNOWN : ERROR()
+        object DB_WRITE_ERROR : ERROR()
     }
 }
