@@ -1,11 +1,13 @@
 package ru.droidcat.feature_onboarding_impl.presentation
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,12 +17,15 @@ import ru.droidcat.core_navigation.NavigationCommand
 import ru.droidcat.core_navigation.NavigationManager
 import ru.droidcat.core_ui.components.buttons.FoodyaFilledButton
 import ru.droidcat.core_ui.components.buttons.FoodyaTextButton
+import ru.droidcat.core_utils.FeatureIntentManager
+import ru.droidcat.feature_onboarding_api.intents.UserSignedIntent
 import ru.droidcat.feature_onboarding_impl.OnboardingSignIn
 import ru.droidcat.feature_onboarding_impl.OnboardingSignUp
 
 @Composable
 fun OnboardingGreetingScreen(
     navigationManager: NavigationManager,
+    featureIntentManager: FeatureIntentManager,
     viewModel: GreetingScreenViewModel = hiltViewModel()
 ) {
 
@@ -31,7 +36,10 @@ fun OnboardingGreetingScreen(
             SplashScreen()
         }
         true -> {
-            Text("User signed in")
+            LaunchedEffect(Unit) {
+                Log.d("Greeting Screen", "User Signed")
+                featureIntentManager.sendIntent(UserSignedIntent)
+            }
         }
         false -> {
             Box(
@@ -60,11 +68,7 @@ fun OnboardingGreetingScreen(
                     FoodyaFilledButton(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
-                            navigationManager.navigate(
-                                object: NavigationCommand {
-                                    override val destination = OnboardingSignIn.route
-                                }
-                            )
+                            navigationManager.navigate(OnboardingSignIn)
                         }
                     ) {
                         Text("Да, войти")
@@ -73,11 +77,7 @@ fun OnboardingGreetingScreen(
                     FoodyaTextButton(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
-                            navigationManager.navigate(
-                                object: NavigationCommand {
-                                    override val destination = OnboardingSignUp.route
-                                }
-                            )
+                            navigationManager.navigate(OnboardingSignUp)
                         }
                     ) {
                         Text("Нет, создать")

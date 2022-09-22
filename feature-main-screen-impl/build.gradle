@@ -6,6 +6,7 @@ plugins {
 }
 
 android {
+    namespace 'ru.droidcat.feature_main_screen_impl'
     compileSdk 33
 
     defaultConfig {
@@ -29,19 +30,24 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-    namespace 'ru.droidcat.feature_onboarding_api'
+    buildFeatures {
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion compose_compiler_version
+    }
 }
 
 dependencies {
 
-    implementation project(":core-network-api")
-    implementation project(":core-network-impl")
-    implementation project(":core-db-api")
-    implementation project(":core-db-impl")
+    implementation project(":feature-main-screen-api")
+    implementation project(":core-ui")
     implementation project(":core-utils")
+    implementation project(":core-navigation")
 
     // Hilt
     implementation "com.google.dagger:hilt-android:2.43.2"
+    implementation "androidx.hilt:hilt-navigation-compose:1.0.0"
     kapt "com.google.dagger:hilt-android-compiler:2.43.2"
 
     implementation 'androidx.core:core-ktx:1.9.0'

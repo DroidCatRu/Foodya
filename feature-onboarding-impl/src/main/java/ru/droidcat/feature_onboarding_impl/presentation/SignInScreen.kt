@@ -21,15 +21,14 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.coerceAtMost
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.*
-import ru.droidcat.core_navigation.NavigateBack
-import ru.droidcat.core_navigation.NavigationManager
 import ru.droidcat.core_ui.components.buttons.FoodyaFilledButton
+import ru.droidcat.core_utils.FeatureIntentManager
+import ru.droidcat.feature_onboarding_api.intents.UserSignedIntent
 import kotlin.math.roundToInt
 
 @OptIn(
@@ -38,11 +37,18 @@ import kotlin.math.roundToInt
 )
 @Composable
 fun OnboardingSignInScreen(
-    navigationManager: NavigationManager,
+    featureIntentManager: FeatureIntentManager,
     viewModel: SignInScreenViewModel = hiltViewModel()
 ) {
 
     val screenState = viewModel.screenState.collectAsState()
+
+    if (screenState.value.userSigned) {
+        Log.d("Sign In", "User signed in")
+        LaunchedEffect(Unit) {
+            featureIntentManager.sendIntent(UserSignedIntent)
+        }
+    }
 
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
@@ -85,16 +91,10 @@ fun OnboardingSignInScreen(
                                     - 4.dp
                                     ).coerceAtMost(0.dp)
 
-//                        Log.d("TextField", textField.javaClass.simpleName)
-//                        Log.d("Offset", "Top: ${topOffset}")
-//                        Log.d("Offset", "Bottom: ${bottomOffset}")
-//                        Log.d("Offset", "Total: ${totalOffset}")
-
                         paddingApplied = textField
 
                         scrollJob?.cancel()
                         scrollJob = scope.launch {
-                            Log.d("Scroll", "To: ${scrollState.value - totalOffset.toPx().toInt()}")
                             scrollState.animateScrollTo(
                                 scrollState.value - totalOffset.toPx().toInt()
                             )
@@ -145,14 +145,14 @@ fun OnboardingSignInScreen(
             verticalArrangement = spacedBy(8.dp)
         ) {
             Text(
-                text = "Рады вас снова видеть",
+                text = "Рады вас видеть снова",
                 style = MaterialTheme.typography.headlineLarge
             )
 
             Spacer(Modifier.height(8.dp))
 
             Text(
-                text = "Укажите почту и пароль",
+                text = "Введите ниже email и пароль",
                 style = MaterialTheme.typography.titleMedium
             )
 
@@ -223,14 +223,14 @@ fun OnboardingSignInScreen(
                     imeAction = ImeAction.Done,
                 ),
                 keyboardActions = KeyboardActions(
-                    onDone = { loginUser(viewModel, navigationManager) }
+                    onDone = { viewModel.signInUser() }
                 )
             )
 
             FoodyaFilledButton(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
-                    loginUser(viewModel, navigationManager)
+                    viewModel.signInUser()
                 }
             ) {
                 Text("Войти")
@@ -238,44 +238,3 @@ fun OnboardingSignInScreen(
         }
     }
 }
-
-private fun navigateBack(navigationManager: NavigationManager) {
-    navigationManager.navigate(NavigateBack)
-}
-
-private fun loginUser(
-    viewModel: SignInScreenViewModel,
-    navigationManager: NavigationManager) {
-    viewModel.signInUser()
-//    navigateBack(navigationManager)
-}
-
-//sealed class TextField(
-//    open val topOffset: Int,
-//    open val size: Int
-//) {
-//    data class NameField(
-//        override val topOffset: Int = 0,
-//        override val size: Int = 0
-//    ) : TextField(topOffset, size)
-//
-//    data class EmailField(
-//        override val topOffset: Int = 0,
-//        override val size: Int = 0
-//    ) : TextField(topOffset, size)
-//
-//    data class PasswordField(
-//        override val topOffset: Int = 0,
-//        override val size: Int = 0
-//    ) : TextField(topOffset, size)
-//}
-//
-//sealed class FocusState {
-//    data class Focused(val field: TextField) : FocusState()
-//    object FocusEmpty : FocusState()
-//}
-//
-//sealed class ImeState {
-//    data class Open(val size: Dp) : ImeState()
-//    object Hidden : ImeState()
-//}

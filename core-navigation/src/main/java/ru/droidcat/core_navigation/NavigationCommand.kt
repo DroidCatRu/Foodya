@@ -9,12 +9,15 @@ interface NavigationCommand {
     val navigateBack: Boolean
         get() = false
 
+    val makeTop: Boolean
+        get() = false
+
     val configuration: NavOptions
         get() = NavOptions.Builder()
             .setLaunchSingleTop(true)
             .build()
 }
 
-object NavigateBack: NavigationCommand {
+object NavigateBack : NavigationCommand {
     override val navigateBack = true
 }

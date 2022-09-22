@@ -19,6 +19,8 @@
             <option value="$PROJECT_DIR$/core-network-impl" />
             <option value="$PROJECT_DIR$/core-ui" />
             <option value="$PROJECT_DIR$/core-utils" />
+            <option value="$PROJECT_DIR$/feature-main-screen-api" />
+            <option value="$PROJECT_DIR$/feature-main-screen-impl" />
             <option value="$PROJECT_DIR$/feature-onboarding-api" />
             <option value="$PROJECT_DIR$/feature-onboarding-impl" />
           </set>

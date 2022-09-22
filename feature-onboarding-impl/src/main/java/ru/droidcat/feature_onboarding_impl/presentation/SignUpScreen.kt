@@ -30,6 +30,8 @@ import kotlinx.coroutines.*
 import ru.droidcat.core_navigation.NavigateBack
 import ru.droidcat.core_navigation.NavigationManager
 import ru.droidcat.core_ui.components.buttons.FoodyaFilledButton
+import ru.droidcat.core_utils.FeatureIntentManager
+import ru.droidcat.feature_onboarding_api.intents.UserSignedIntent
 import kotlin.math.roundToInt
 
 @OptIn(
@@ -38,11 +40,18 @@ import kotlin.math.roundToInt
 )
 @Composable
 fun OnboardingSignUpScreen(
-    navigationManager: NavigationManager,
+    featureIntentManager: FeatureIntentManager,
     viewModel: SignUpScreenViewModel = hiltViewModel()
 ) {
 
     val screenState = viewModel.screenState.collectAsState()
+
+    if (screenState.value.userSigned) {
+        Log.d("Sign Up", "User signed up")
+        LaunchedEffect(Unit) {
+            featureIntentManager.sendIntent(UserSignedIntent)
+        }
+    }
 
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
@@ -86,16 +95,10 @@ fun OnboardingSignUpScreen(
                                     - 4.dp
                                     ).coerceAtMost(0.dp)
 
-                        Log.d("TextField", textField.javaClass.simpleName)
-                        Log.d("Offset", "Top: ${topOffset}")
-                        Log.d("Offset", "Bottom: ${bottomOffset}")
-                        Log.d("Offset", "Total: ${totalOffset}")
-
                         paddingApplied = textField
 
                         scrollJob?.cancel()
                         scrollJob = scope.launch {
-                            Log.d("Scroll", "To: ${scrollState.value - totalOffset.toPx().toInt()}")
                             scrollState.animateScrollTo(
                                 scrollState.value - totalOffset.toPx().toInt()
                             )
@@ -259,31 +262,20 @@ fun OnboardingSignUpScreen(
                     imeAction = ImeAction.Done,
                 ),
                 keyboardActions = KeyboardActions(
-                    onDone = { createUser(viewModel, navigationManager) }
+                    onDone = { viewModel.signUpUser() }
                 )
             )
 
             FoodyaFilledButton(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
-                    createUser(viewModel, navigationManager)
+                    viewModel.signUpUser()
                 }
             ) {
                 Text("Создать аккаунт")
             }
         }
     }
-}
-
-private fun navigateBack(navigationManager: NavigationManager) {
-    navigationManager.navigate(NavigateBack)
-}
-
-private fun createUser(
-    viewModel: SignUpScreenViewModel,
-    navigationManager: NavigationManager) {
-    viewModel.signUpUser()
-//    navigateBack(navigationManager)
 }
 
 sealed class TextField(

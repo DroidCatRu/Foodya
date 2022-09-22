@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import ru.droidcat.core_navigation.NavigationDestination
 import ru.droidcat.core_navigation.NavigationFactory
 import ru.droidcat.feature_onboarding_impl.OnboardingDestination
 
@@ -16,7 +17,7 @@ fun NavigationHost(
     NavHost(
         modifier = modifier,
         navController = navController,
-        startDestination = OnboardingDestination.route
+        startDestination = OnboardingDestination.destination
     ) {
         factories.forEach {
             it.create(this)

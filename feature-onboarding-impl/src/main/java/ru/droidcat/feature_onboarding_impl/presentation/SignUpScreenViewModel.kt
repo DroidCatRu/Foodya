@@ -1,5 +1,6 @@
 package ru.droidcat.feature_onboarding_impl.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -7,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import ru.droidcat.core_utils.IoScope
+import ru.droidcat.feature_onboarding_api.SignResults
 import ru.droidcat.feature_onboarding_api.usecase.SignUpUserUseCase
 import javax.inject.Inject
 
@@ -44,11 +46,16 @@ class SignUpScreenViewModel @Inject constructor(
         }
         if (!textFieldsHasErrors()) {
             scope.launch {
-                signUpUserUseCase(
+                val signResult = signUpUserUseCase(
                     name = _screenState.value.nameFieldValue,
                     email = _screenState.value.emailFieldValue,
                     password = _screenState.value.passwordFieldValue
                 )
+                if (signResult is SignResults.SUCCESS) {
+                    _screenState.value = _screenState.value.copy(userSigned = true)
+                } else {
+                    Log.d("Sign Up", signResult.toString())
+                }
             }
         }
     }
@@ -64,6 +71,8 @@ class SignUpScreenViewModel @Inject constructor(
 }
 
 data class SignUpScreenState(
+    val userSigned: Boolean = false,
+
     val globalError: String? = null,
 
     val nameFieldValue: String = "",

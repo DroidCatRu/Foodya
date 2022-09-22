@@ -6,6 +6,7 @@ plugins {
 }
 
 android {
+    namespace 'ru.droidcat.feature_main_screen'
     compileSdk 33
 
     defaultConfig {
@@ -29,15 +30,10 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-    namespace 'ru.droidcat.feature_onboarding_api'
 }
 
 dependencies {
 
-    implementation project(":core-network-api")
-    implementation project(":core-network-impl")
-    implementation project(":core-db-api")
-    implementation project(":core-db-impl")
     implementation project(":core-utils")
 
     // Hilt

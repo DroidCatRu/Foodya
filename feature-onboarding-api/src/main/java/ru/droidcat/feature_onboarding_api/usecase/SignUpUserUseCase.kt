@@ -18,7 +18,20 @@ class SignUpUserUseCase(
         val networkResult = networkRepository.signUpUserEmailPassword(name, email, password)
 
         if (networkResult is MutationResult.ERROR){
-            return SignResults.ERROR.UNKNOWN
+            return when (networkResult) {
+                is MutationResult.ERROR.AUTH.USER_ALREADY_SIGNED_IN -> {
+                    SignResults.ERROR.USER_ALREADY_SIGNED_IN
+                }
+                is MutationResult.ERROR.AUTH.USER_ALREADY_EXISTS -> {
+                    SignResults.ERROR.USER_ALREADY_EXISTS
+                }
+                is MutationResult.ERROR.AUTH.WEAK_PASSWORD -> {
+                    SignResults.ERROR.WEAK_PASSWORD
+                }
+                else -> {
+                    SignResults.ERROR.UNKNOWN
+                }
+            }
         }
 
         val dbResult =
