@@ -113,15 +113,15 @@ class DatabaseRepositoryImpl @Inject constructor(
         database.userFoodDao.removeUserFoodByName(foodName)
     }
 
-    override suspend fun getUserFoodByName(foodName: String): Food {
+    override suspend fun getUserFoodByName(foodName: String): Food? {
         return database.userFoodDao.getUserFoodByName(foodName)
     }
 
-    override suspend fun getAllUserFood(): List<Food> {
+    override suspend fun getAllUserFood(): List<Food>? {
         return database.userFoodDao.getAllUserFood()
     }
 
-    override suspend fun getUserExpireFood(daysToExpire: Int): List<Food> {
+    override suspend fun getUserExpireFood(daysToExpire: Int): List<Food>? {
         val currentTimeStamp = System.currentTimeMillis() / 1000L
         return database.userFoodDao.getUserExpireFood(currentTimeStamp, daysToExpire)
     }

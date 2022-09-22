@@ -14,12 +14,12 @@ interface UserFoodDao {
     suspend fun removeUserFoodByName(foodName: String)
 
     @Query("SELECT * FROM food WHERE name = :foodName")
-    suspend fun getUserFoodByName(foodName: String): Food
+    suspend fun getUserFoodByName(foodName: String): Food?
 
     @Query("SELECT * FROM food")
-    suspend fun getAllUserFood(): List<Food>
+    suspend fun getAllUserFood(): List<Food>?
 
     @Query("SELECT * FROM food WHERE expiration_time - :currentTimestamp < 86400 * :daysToExpire")
-    suspend fun getUserExpireFood(currentTimestamp: Long, daysToExpire: Int): List<Food>
+    suspend fun getUserExpireFood(currentTimestamp: Long, daysToExpire: Int): List<Food>?
 
 }

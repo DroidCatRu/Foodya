@@ -34,10 +34,10 @@ interface DatabaseRepository {
 
     suspend fun removeUserFoodByName(foodName: String)
 
-    suspend fun getUserFoodByName(foodName: String): Food
+    suspend fun getUserFoodByName(foodName: String): Food?
 
-    suspend fun getAllUserFood(): List<Food>
+    suspend fun getAllUserFood(): List<Food>?
 
-    suspend fun getUserExpireFood(daysToExpire: Int): List<Food>
+    suspend fun getUserExpireFood(daysToExpire: Int): List<Food>?
 
 }
