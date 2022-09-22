@@ -68,14 +68,13 @@ class NetworkRepositoryImpl @Inject constructor(
         val user = firebaseAuthResult?.user ?: return MutationResult.ERROR.AUTH.UNKNOWN
 
 
-
         val apolloClient = NetworkService.getInstance()!!.getApolloClientWithAuthToken()
 
         val result = apolloClient
             .mutation(CreateUserMutation(name, email))
             .execute()
 
-        if (result.data != null){
+        if (result.data != null) {
 
             val userJsonObject = JSONObject(result.data!!.toJson())
                 .getJSONObject("createUser")
@@ -88,7 +87,7 @@ class NetworkRepositoryImpl @Inject constructor(
             return MutationResult.SUCCESS(databaseId)
         } else {
             val errorMessage = result.errors!![0].message
-            return when(errorMessage){
+            return when (errorMessage) {
                 "400: Bad Request" -> MutationResult.ERROR.HTTP.BAD_REQUEST_400
                 "403: Forbidden" -> MutationResult.ERROR.HTTP.FORBIDDEN_403
                 "Not authorized to see this resource" -> MutationResult.ERROR.HTTP.NOT_AUTHORIZED
@@ -111,8 +110,17 @@ class NetworkRepositoryImpl @Inject constructor(
                 password
             )
 
-        return if (firebaseAuthResult?.user != null) {
-            MutationResult.SUCCESS()
+        val userUid = firebaseAuthResult?.user?.uid
+
+        return if (userUid != null) {
+            val databaseId = firebaseDb.reference.child("users").child(userUid).get().await()
+                .getValue(String::class.java)
+
+            if (databaseId.isNullOrBlank()) {
+                MutationResult.ERROR.AUTH.UNKNOWN
+            }
+
+            MutationResult.SUCCESS(databaseId)
         } else {
             MutationResult.ERROR.AUTH.UNKNOWN
         }
@@ -124,7 +132,7 @@ class NetworkRepositoryImpl @Inject constructor(
             .mutation(DeleteUserMutation())
             .execute()
 
-        if (result.data != null){
+        if (result.data != null) {
 
             val currentUser = firebaseAuth.currentUser
             if (currentUser == null) return MutationResult.ERROR.AUTH.USER_NOT_SIGNED_IN
@@ -134,7 +142,7 @@ class NetworkRepositoryImpl @Inject constructor(
             return MutationResult.SUCCESS()
         } else {
             val errorMessage = result.errors!![0].message
-            return when(errorMessage){
+            return when (errorMessage) {
                 "400: Bad Request" -> MutationResult.ERROR.HTTP.BAD_REQUEST_400
                 "403: Forbidden" -> MutationResult.ERROR.HTTP.FORBIDDEN_403
                 "Not authorized to see this resource" -> MutationResult.ERROR.HTTP.NOT_AUTHORIZED
@@ -150,11 +158,11 @@ class NetworkRepositoryImpl @Inject constructor(
             .mutation(GenerateMealPlanMutation())
             .execute()
 
-        if (result.data != null){
+        if (result.data != null) {
             return MutationResult.SUCCESS()
         } else {
             val errorMessage = result.errors!![0].message
-            when(errorMessage){
+            when (errorMessage) {
                 "400: Bad Request" -> return MutationResult.ERROR.HTTP.BAD_REQUEST_400
                 "403: Forbidden" -> return MutationResult.ERROR.HTTP.FORBIDDEN_403
                 "Not authorized to see this resource" -> return MutationResult.ERROR.HTTP.NOT_AUTHORIZED
@@ -170,7 +178,7 @@ class NetworkRepositoryImpl @Inject constructor(
             .query(GetHydrationQuery(date))
             .execute()
 
-        if (result.data != null){
+        if (result.data != null) {
 
             val hydrationJsonObject = JSONObject(result.data!!.toJson())
                 .getJSONArray("hydration")
@@ -195,7 +203,7 @@ class NetworkRepositoryImpl @Inject constructor(
             .query(GetMealPlanQuery())
             .execute()
 
-        if (result.data != null){
+        if (result.data != null) {
 
             val mealsJSONArray = JSONObject(result.data!!.toJson())
                 .getJSONArray("mealPlan")
@@ -204,17 +212,21 @@ class NetworkRepositoryImpl @Inject constructor(
 
             val mealsList = ArrayList<Meal>()
 
-            for (i in 0..mealsJSONArray.length()){
+            for (i in 0 until mealsJSONArray.length()) {
                 val singleMeal = mealsJSONArray.getJSONObject(i)
-                mealsList.add(Meal(
-                    MealType.valueOf(singleMeal.getString("meal").uppercase(Locale.getDefault())),
-                    RecipeBasic(
-                        singleMeal.getJSONObject("recipe").getString("id"),
-                        singleMeal.getJSONObject("recipe").getString("databaseId"),
-                        singleMeal.getJSONObject("recipe").getString("name"),
-                        singleMeal.getJSONObject("recipe").getString("mainImage"),
+                mealsList.add(
+                    Meal(
+                        MealType.valueOf(
+                            singleMeal.getString("meal").uppercase(Locale.getDefault())
+                        ),
+                        RecipeBasic(
+                            singleMeal.getJSONObject("recipe").getString("id"),
+                            singleMeal.getJSONObject("recipe").getString("databaseId"),
+                            singleMeal.getJSONObject("recipe").getString("name"),
+                            singleMeal.getJSONObject("recipe").getString("mainImage"),
+                        )
                     )
-                ))
+                )
             }
 
             return mealsList
@@ -231,7 +243,7 @@ class NetworkRepositoryImpl @Inject constructor(
             .query(GetPopularRecipesQuery())
             .execute()
 
-        if (result.data != null){
+        if (result.data != null) {
 
             val recipesJSONArray = JSONObject(result.data!!.toJson())
                 .getJSONObject("popularRecipes")
@@ -239,14 +251,16 @@ class NetworkRepositoryImpl @Inject constructor(
 
             val recipesList = ArrayList<RecipeBasic>()
 
-            for (i in 0..recipesJSONArray.length()){
-                val singleRecipe =recipesJSONArray.getJSONObject(i).getJSONObject("node")
-                recipesList.add(RecipeBasic(
-                    singleRecipe.getString("id"),
-                    singleRecipe.getString("databaseId"),
-                    singleRecipe.getString("name"),
-                    singleRecipe.getString("mainImage")
-                ))
+            for (i in 0 until recipesJSONArray.length()) {
+                val singleRecipe = recipesJSONArray.getJSONObject(i).getJSONObject("node")
+                recipesList.add(
+                    RecipeBasic(
+                        singleRecipe.getString("id"),
+                        singleRecipe.getString("databaseId"),
+                        singleRecipe.getString("name"),
+                        singleRecipe.getString("mainImage")
+                    )
+                )
             }
 
             return recipesList
@@ -263,7 +277,7 @@ class NetworkRepositoryImpl @Inject constructor(
             .query(GetRecipesByIngredientsQuery(ingredientsList))
             .execute()
 
-        if (result.data != null){
+        if (result.data != null) {
 
             val recipesJSONArray = JSONObject(result.data!!.toJson())
                 .getJSONObject("searchRecipesByIngredients")
@@ -271,14 +285,16 @@ class NetworkRepositoryImpl @Inject constructor(
 
             val recipesList = ArrayList<RecipeBasic>()
 
-            for (i in 0..recipesJSONArray.length()){
-                val singleRecipe =recipesJSONArray.getJSONObject(i).getJSONObject("node")
-                recipesList.add(RecipeBasic(
-                    singleRecipe.getString("id"),
-                    singleRecipe.getString("databaseId"),
-                    singleRecipe.getString("name"),
-                    singleRecipe.getString("mainImage")
-                ))
+            for (i in 0 until recipesJSONArray.length()) {
+                val singleRecipe = recipesJSONArray.getJSONObject(i).getJSONObject("node")
+                recipesList.add(
+                    RecipeBasic(
+                        singleRecipe.getString("id"),
+                        singleRecipe.getString("databaseId"),
+                        singleRecipe.getString("name"),
+                        singleRecipe.getString("mainImage")
+                    )
+                )
             }
 
             return recipesList
@@ -312,13 +328,12 @@ class NetworkRepositoryImpl @Inject constructor(
         } else {
             return null
         }
-
     }
 
-    private fun linesFromJsonArray(jsonArray: JSONArray) : List<String>{
+    private fun linesFromJsonArray(jsonArray: JSONArray): List<String> {
         val list = ArrayList<String>()
 
-        for (i in 0..jsonArray.length()) list.add(jsonArray.getString(i))
+        for (i in 0 until jsonArray.length()) list.add(jsonArray.getString(i))
 
         return list
     }
@@ -326,10 +341,10 @@ class NetworkRepositoryImpl @Inject constructor(
     override suspend fun getUsers(): List<UserData>? {
 
         val result = NetworkService.getInstance()!!.getApolloClientWithAuthToken()
-            .mutation(RemoveMealPlanMutation())
+            .query(GetUsersQuery())
             .execute()
 
-        if (result.data != null){
+        if (result.data != null) {
 
             val list = ArrayList<UserData>()
 
@@ -337,22 +352,23 @@ class NetworkRepositoryImpl @Inject constructor(
                 .getJSONObject("users")
                 .getJSONArray("edges")
 
-            for (i in 0..usersJsonArray.length()){
+            for (i in 0 until usersJsonArray.length()) {
                 val singleUser = usersJsonArray.getJSONObject(i).getJSONObject("node")
-                list.add(UserData(
-                    singleUser.getString("id"),
-                    singleUser.getString("databaseId"),
-                    singleUser.getString("name"),
-                    singleUser.getString("email"),
-                    null,null,null,null,null,null,null, null
-                ))
+                list.add(
+                    UserData(
+                        singleUser.getString("id"),
+                        singleUser.getString("databaseId"),
+                        singleUser.getString("name"),
+                        singleUser.getString("email"),
+                        null, null, null, null, null, null, null, null
+                    )
+                )
             }
 
             return list
         } else {
             return null
         }
-
     }
 
     override suspend fun removeUserMealPlan(databaseId: String): MutationResult {
@@ -361,18 +377,17 @@ class NetworkRepositoryImpl @Inject constructor(
             .mutation(RemoveMealPlanMutation())
             .execute()
 
-        if (result.data != null){
+        if (result.data != null) {
             return MutationResult.SUCCESS()
         } else {
             val errorMessage = result.errors!![0].message
-            when(errorMessage){
+            when (errorMessage) {
                 "400: Bad Request" -> return MutationResult.ERROR.HTTP.BAD_REQUEST_400
                 "403: Forbidden" -> return MutationResult.ERROR.HTTP.FORBIDDEN_403
                 "Not authorized to see this resource" -> return MutationResult.ERROR.HTTP.NOT_AUTHORIZED
                 else -> return MutationResult.ERROR.HTTP.UNKNOWN
             }
         }
-
     }
 
     override suspend fun updateUserHydration(databaseId: String, date: String): MutationResult {
@@ -381,18 +396,17 @@ class NetworkRepositoryImpl @Inject constructor(
             .mutation(UpdateHydrationMutation(date))
             .execute()
 
-        if (result.data != null){
+        if (result.data != null) {
             return MutationResult.SUCCESS()
         } else {
             val errorMessage = result.errors!![0].message
-            when(errorMessage){
+            when (errorMessage) {
                 "400: Bad Request" -> return MutationResult.ERROR.HTTP.BAD_REQUEST_400
                 "403: Forbidden" -> return MutationResult.ERROR.HTTP.FORBIDDEN_403
                 "Not authorized to see this resource" -> return MutationResult.ERROR.HTTP.NOT_AUTHORIZED
                 else -> return MutationResult.ERROR.HTTP.UNKNOWN
             }
         }
-
     }
 
     override suspend fun updateMealPlan(databaseId: String, calories: Int): MutationResult {
@@ -401,18 +415,17 @@ class NetworkRepositoryImpl @Inject constructor(
             .mutation(UpdateMealPlanSettingsMutation(Optional.present(calories)))
             .execute()
 
-        if (result.data != null){
+        if (result.data != null) {
             return MutationResult.SUCCESS()
         } else {
             val errorMessage = result.errors!![0].message
-            when(errorMessage){
+            when (errorMessage) {
                 "400: Bad Request" -> return MutationResult.ERROR.HTTP.BAD_REQUEST_400
                 "403: Forbidden" -> return MutationResult.ERROR.HTTP.FORBIDDEN_403
                 "Not authorized to see this resource" -> return MutationResult.ERROR.HTTP.NOT_AUTHORIZED
                 else -> return MutationResult.ERROR.HTTP.UNKNOWN
             }
         }
-
     }
 
     override suspend fun setProfileMacroGoals(
@@ -424,41 +437,42 @@ class NetworkRepositoryImpl @Inject constructor(
     ): MutationResult {
 
         val result = NetworkService.getInstance()!!.getApolloClientWithUserID(databaseId)
-            .mutation(SetProfileMacroGoalsMutation(
-                true,
-                if (gender == UserGender.MALE) BiologicalSex.MALE else BiologicalSex.FEMALE,
+            .mutation(
+                SetProfileMacroGoalsMutation(
+                    true,
+                    if (gender == UserGender.MALE) BiologicalSex.MALE else BiologicalSex.FEMALE,
 //                SimpleDateFormat("yyyy-MM-dd", Locale("ru")).format(Date())
-                birthDate,
-                height,
-                weight,
-                WeeklyWeightGoal.MAINTAIN,
-                ActivityLevel.NOT_ACTIVE
-            ))
+                    birthDate,
+                    height,
+                    weight,
+                    WeeklyWeightGoal.MAINTAIN,
+                    ActivityLevel.NOT_ACTIVE
+                )
+            )
             .execute()
 
-        if (result.data != null){
+        if (result.data != null) {
             return MutationResult.SUCCESS()
         } else {
             val errorMessage = result.errors!![0].message
-            when(errorMessage){
+            when (errorMessage) {
                 "400: Bad Request" -> return MutationResult.ERROR.HTTP.BAD_REQUEST_400
                 "403: Forbidden" -> return MutationResult.ERROR.HTTP.FORBIDDEN_403
                 "Not authorized to see this resource" -> return MutationResult.ERROR.HTTP.NOT_AUTHORIZED
                 else -> return MutationResult.ERROR.HTTP.UNKNOWN
             }
         }
-
     }
 
     override suspend fun getUserProfile(databaseId: String): UserData? {
 
-        val resultWithoutNameField = NetworkService.getInstance()!!.getApolloClientWithUserID(databaseId)
-            .query(GetUserProfileQuery())
-            .execute()
-            .data
+        val resultWithoutNameField =
+            NetworkService.getInstance()!!.getApolloClientWithUserID(databaseId)
+                .query(GetUserProfileQuery())
+                .execute()
+                .data
 
         if (resultWithoutNameField == null) return null
-
         else {
 
             val usersWithNames = getUsers() ?: return null
@@ -468,7 +482,7 @@ class NetworkRepositoryImpl @Inject constructor(
             val userEmail = userJsonObject.getString("email")
             var userName: String? = null
 
-            for (user in usersWithNames){
+            for (user in usersWithNames) {
                 if (userEmail.equals(user.email)) {
                     userName = user.name
                     break
@@ -491,42 +505,44 @@ class NetworkRepositoryImpl @Inject constructor(
                 userJsonObject.getInt("dailyCaloricIntakeGoal"),
                 getRestrictionsFromJsonArray(userJsonObject.getJSONArray("restrictions"))
             )
-
         }
-
     }
 
-    private fun getRestrictionsFromJsonArray(jsonArray: JSONArray) : List<Restriction>{
+    private fun getRestrictionsFromJsonArray(jsonArray: JSONArray): List<Restriction> {
         val list = ArrayList<Restriction>()
 
-        for (i in 0..jsonArray.length()){
-            list.add(Restriction(
-                jsonArray.getJSONObject(i).getString("id"),
-                jsonArray.getJSONObject(i).getString("name")
-            ))
+        for (i in 0 until jsonArray.length()) {
+            list.add(
+                Restriction(
+                    jsonArray.getJSONObject(i).getString("id"),
+                    jsonArray.getJSONObject(i).getString("name")
+                )
+            )
         }
 
         return list
     }
 
-    override suspend fun addUserRestrictions(databaseId: String, restrictions: List<String>): MutationResult {
+    override suspend fun addUserRestrictions(
+        databaseId: String,
+        restrictions: List<String>
+    ): MutationResult {
 
         val result = NetworkService.getInstance()!!.getApolloClientWithUserID(databaseId)
             .mutation(AddUserRestrictionsMutation(Optional.present(restrictions)))
             .execute()
 
-        if (result.data != null){
+        if (result.data != null) {
             return MutationResult.SUCCESS()
         } else {
             val errorMessage = result.errors!![0].message
-            when(errorMessage){
+            when (errorMessage) {
                 "400: Bad Request" -> return MutationResult.ERROR.HTTP.BAD_REQUEST_400
                 "403: Forbidden" -> return MutationResult.ERROR.HTTP.FORBIDDEN_403
                 "Not authorized to see this resource" -> return MutationResult.ERROR.HTTP.NOT_AUTHORIZED
                 else -> return MutationResult.ERROR.HTTP.UNKNOWN
             }
         }
-
     }
 
     override suspend fun getAllRestrictions(): List<Restriction>? {
@@ -535,7 +551,7 @@ class NetworkRepositoryImpl @Inject constructor(
             .query(GetAllRestrictionsQuery())
             .execute()
 
-        if (result.data != null){
+        if (result.data != null) {
 
             val list = ArrayList<Restriction>()
 
@@ -543,19 +559,20 @@ class NetworkRepositoryImpl @Inject constructor(
                 .getJSONObject("restrictions")
                 .getJSONArray("edges")
 
-            for (i in 0..restrictionsJsonArray.length()){
+            for (i in 0 until restrictionsJsonArray.length()) {
                 val singleRestriction = restrictionsJsonArray.getJSONObject(i).getJSONObject("node")
-                list.add(Restriction(
-                    singleRestriction.getString("id"),
-                    singleRestriction.getString("name")
-                ))
+                list.add(
+                    Restriction(
+                        singleRestriction.getString("id"),
+                        singleRestriction.getString("name")
+                    )
+                )
             }
 
             return list
         } else {
             return null
         }
-
     }
 
     private suspend fun signInFirebaseWithEmail(

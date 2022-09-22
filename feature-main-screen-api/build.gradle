@@ -35,6 +35,10 @@ android {
 dependencies {
 
     implementation project(":core-utils")
+    implementation project(":core-db-api")
+    implementation project(":core-db-impl")
+    implementation project(":core-network-api")
+    implementation project(":core-network-impl")
 
     // Hilt
     implementation "com.google.dagger:hilt-android:2.43.2"

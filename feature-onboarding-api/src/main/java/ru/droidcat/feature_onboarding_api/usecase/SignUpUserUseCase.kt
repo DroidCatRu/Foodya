@@ -4,8 +4,9 @@ import ru.droidcat.core_db_api.DatabaseRepository
 import ru.droidcat.core_network_api.MutationResult
 import ru.droidcat.core_network_api.NetworkRepository
 import ru.droidcat.feature_onboarding_api.SignResults
+import javax.inject.Inject
 
-class SignUpUserUseCase(
+class SignUpUserUseCase @Inject constructor(
     private val networkRepository: NetworkRepository,
     private val dbRepository: DatabaseRepository
 ) {
