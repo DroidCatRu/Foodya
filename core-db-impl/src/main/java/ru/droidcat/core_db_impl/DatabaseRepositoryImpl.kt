@@ -1,8 +1,10 @@
 package ru.droidcat.core_db_impl
 
 import android.content.SharedPreferences
+import androidx.room.RoomDatabase
 import org.json.JSONArray
 import ru.droidcat.core_db_api.DatabaseRepository
+import ru.droidcat.core_db_api.UserFoodDatabase
 import ru.droidcat.core_db_api.food.Food
 import ru.droidcat.core_db_api.food.FoodCategory
 import ru.droidcat.core_db_api.food.FoodGroup
@@ -10,7 +12,8 @@ import java.io.File
 import javax.inject.Inject
 
 class DatabaseRepositoryImpl @Inject constructor(
-    private val sharedPref: SharedPreferences
+    private val sharedPref: SharedPreferences,
+    private val database: UserFoodDatabase
 ) : DatabaseRepository {
 
     private val USER_ID_KEY = "USER_ID_KEY"
@@ -26,7 +29,7 @@ class DatabaseRepositoryImpl @Inject constructor(
         return sharedPref.getString(USER_ID_KEY, null)
     }
 
-    override suspend fun clearLocalStorage(): Boolean {
+    override suspend fun clearUserDatabaseId(): Boolean {
         return sharedPref
             .edit()
             .clear()
@@ -34,7 +37,7 @@ class DatabaseRepositoryImpl @Inject constructor(
     }
 
 
-    override suspend fun getAllFoods(): List<Food> {
+    override suspend fun getAllFood(): List<Food> {
         return JsonHandler.getFoodList()
     }
 
@@ -74,6 +77,7 @@ class DatabaseRepositoryImpl @Inject constructor(
                 for (i in 0..foodJsonArray.length()) {
                     foodList.add(
                         Food(
+                            null,
                             foodJsonArray.getJSONObject(i).getString("name"),
                             foodJsonArray.getJSONObject(i).getString("description"),
                             FoodGroup.valueOf(
@@ -84,7 +88,9 @@ class DatabaseRepositoryImpl @Inject constructor(
                             FoodCategory.valueOf(
                                 foodJsonArray.getJSONObject(i).getString("category").uppercase()
                                     .replace(" ", "_")
-                            )
+                            ),
+                            null,
+                            null
                         )
                     )
 
@@ -92,5 +98,31 @@ class DatabaseRepositoryImpl @Inject constructor(
             }
             return foodList!!
         }
+    }
+
+
+    override suspend fun storeUserFood(
+        foodName: String,
+        foodCreateTime: Long,
+        foodExpirationTime: Long
+    ) {
+        database.userFoodDao.storeUserFood(foodName, foodCreateTime, foodExpirationTime)
+    }
+
+    override suspend fun removeUserFoodByName(foodName: String) {
+        database.userFoodDao.removeUserFoodByName(foodName)
+    }
+
+    override suspend fun getUserFoodByName(foodName: String): Food {
+        return database.userFoodDao.getUserFoodByName(foodName)
+    }
+
+    override suspend fun getAllUserFood(): List<Food> {
+        return database.userFoodDao.getAllUserFood()
+    }
+
+    override suspend fun getUserExpireFood(daysToExpire: Int): List<Food> {
+        val currentTimeStamp = System.currentTimeMillis() / 1000L
+        return database.userFoodDao.getUserExpireFood(currentTimeStamp, daysToExpire)
     }
 }
