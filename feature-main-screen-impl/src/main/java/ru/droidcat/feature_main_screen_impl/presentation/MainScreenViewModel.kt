@@ -26,6 +26,14 @@ class MainScreenViewModel @Inject constructor(
         getUserName()
     }
 
+    fun addWater() {
+
+    }
+
+    fun decreaseWater() {
+
+    }
+
     private fun getUserName() {
         getNameJob?.cancel()
         getNameJob = scope.launch {
@@ -33,10 +41,11 @@ class MainScreenViewModel @Inject constructor(
             if (!nameFromNet.isNullOrBlank()) {
                 _screenState.value = _screenState.value.copy(userName = nameFromNet)
             }
+//            _screenState.value = _screenState.value.copy(userName = "Артем")
         }
     }
 }
 
 data class MainScreenState(
-    val userName: String = "username"
+    val userName: String = "\u2588\u2588\u2588\u2588\u2588\u2588"
 )
