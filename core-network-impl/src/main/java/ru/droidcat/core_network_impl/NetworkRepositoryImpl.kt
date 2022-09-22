@@ -26,6 +26,7 @@ import java.lang.Exception
 import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
+import kotlin.streams.toList
 
 class NetworkRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
@@ -74,14 +75,9 @@ class NetworkRepositoryImpl @Inject constructor(
             .mutation(CreateUserMutation(name, email))
             .execute()
 
-        if (result.data != null) {
+        if (result.data?.createUser?.user != null) {
 
-            val userJsonObject = JSONObject(result.data!!.toJson())
-                .getJSONObject("createUser")
-                .getJSONObject("user")
-
-            val databaseId = userJsonObject.getString("databaseId")
-
+            val databaseId = result.data!!.createUser!!.user!!.databaseId
             firebaseDb.reference.child("users").child(user.uid).setValue(databaseId)
 
             return MutationResult.SUCCESS(databaseId)
@@ -180,15 +176,13 @@ class NetworkRepositoryImpl @Inject constructor(
 
         if (result.data != null) {
 
-            val hydrationJsonObject = JSONObject(result.data!!.toJson())
-                .getJSONArray("hydration")
-                .getJSONObject(0)
+            val hydrationJsonObject = result.data?.hydration?.get(0) ?: return null
 
             return HydrationInfo(
-                hydrationJsonObject.getBoolean("isToday"),
-                hydrationJsonObject.getInt("quantity"),
-                hydrationJsonObject.getString("date"),
-                hydrationJsonObject.getInt("goal")
+                    hydrationJsonObject.isToday ?: false,
+                    hydrationJsonObject.quantity ?: 0,
+                    hydrationJsonObject.date as String? ?: "",
+                    hydrationJsonObject.goal ?: 0
             )
 
         } else {
@@ -466,20 +460,18 @@ class NetworkRepositoryImpl @Inject constructor(
 
     override suspend fun getUserProfile(databaseId: String): UserData? {
 
-        val resultWithoutNameField =
+        val profileWithoutName =
             NetworkService.getInstance()!!.getApolloClientWithUserID(databaseId)
                 .query(GetUserProfileQuery())
                 .execute()
-                .data
+                .data?.myProfile
 
-        if (resultWithoutNameField == null) return null
+        if (profileWithoutName == null) return null
         else {
 
             val usersWithNames = getUsers() ?: return null
 
-            var userJsonObject = JSONObject(resultWithoutNameField.toJson())
-            userJsonObject = userJsonObject.getJSONObject("myProfile")
-            val userEmail = userJsonObject.getString("email")
+            val userEmail = profileWithoutName.email
             var userName: String? = null
 
             for (user in usersWithNames) {
@@ -492,35 +484,25 @@ class NetworkRepositoryImpl @Inject constructor(
             if (userName == null) return null
 
             return UserData(
-                userJsonObject.getString("id"),
+                profileWithoutName.id as String,
                 databaseId,
                 userName,
-                userJsonObject.getString("email"),
-                userJsonObject.getString("birthdate"),
-                if (userJsonObject.getString("biologicalSex") === "MALE") UserGender.MALE else UserGender.FEMALE,
-                userJsonObject.getString("activityLevel"),
-                userJsonObject.getInt("startingWeight"),
-                userJsonObject.getDouble("height"),
-                userJsonObject.getBoolean("goalsOn"),
-                userJsonObject.getInt("dailyCaloricIntakeGoal"),
-                getRestrictionsFromJsonArray(userJsonObject.getJSONArray("restrictions"))
+                userEmail,
+                profileWithoutName.birthdate as String?,
+                if (profileWithoutName.biologicalSex == BiologicalSex.MALE) UserGender.MALE else UserGender.FEMALE,
+                ActivityLevel.NOT_ACTIVE.toString(),
+                profileWithoutName.startingWeight?.toInt(),
+                profileWithoutName.height,
+                profileWithoutName.goalsOn,
+                profileWithoutName.dailyCaloricIntakeGoal,
+                profileWithoutName.restrictions
+                    ?.stream()
+                    ?.map {
+                        it -> Restriction(it!!.id, it.name!!)
+                    }
+                    ?.toList()
             )
         }
-    }
-
-    private fun getRestrictionsFromJsonArray(jsonArray: JSONArray): List<Restriction> {
-        val list = ArrayList<Restriction>()
-
-        for (i in 0 until jsonArray.length()) {
-            list.add(
-                Restriction(
-                    jsonArray.getJSONObject(i).getString("id"),
-                    jsonArray.getJSONObject(i).getString("name")
-                )
-            )
-        }
-
-        return list
     }
 
     override suspend fun addUserRestrictions(
