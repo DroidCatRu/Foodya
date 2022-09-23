@@ -1,34 +1,43 @@
 package ru.droidcat.feature_recipes_impl.presentation
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import ru.droidcat.core_ui.components.cards.RecipeCard
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RecipesScreen() {
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(160.dp),
-        state = rememberLazyGridState(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+fun RecipesScreen(
+    viewModel: RecipesScreenViewModel = hiltViewModel()
+) {
+
+    val state = viewModel.screenState.collectAsState()
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize(),
         contentPadding = PaddingValues(
-            horizontal = 16.dp
-        )
+            top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding() + 24.dp,
+            bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding() + 96.dp,
+            start = WindowInsets.systemBars.asPaddingValues()
+                .calculateStartPadding(LocalLayoutDirection.current) + 16.dp,
+            end = WindowInsets.systemBars.asPaddingValues()
+                .calculateEndPadding(LocalLayoutDirection.current) + 16.dp
+        ),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(10) { index ->
-            OutlinedCard(
-                onClick = { /*TODO*/ }
-            ) {
-                Text(index.toString())
-            }
+        items(state.value.recipes) { recipe ->
+            RecipeCard(
+                recipeName = recipe.name,
+                servings = recipe.servings,
+                weight = recipe.weight,
+                recipeImageUrl = recipe.imageUrl
+            )
         }
     }
 }

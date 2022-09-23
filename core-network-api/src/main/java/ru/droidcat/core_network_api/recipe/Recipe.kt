@@ -5,4 +5,6 @@ abstract class Recipe {
     abstract val databaseId: String
     abstract val name: String
     abstract val mainImage: String
+    abstract val servings: Int
+    abstract val weightInGrams: Float
 }

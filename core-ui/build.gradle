@@ -38,6 +38,8 @@ android {
 
 dependencies {
 
+    api "com.github.skydoves:landscapist-glide:2.0.0"
+
     implementation 'androidx.core:core-ktx:1.9.0'
 
     api "com.google.android.material:material:1.6.1"

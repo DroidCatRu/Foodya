@@ -1,6 +1,8 @@
 package ru.droidcat.feature_main_screen_impl.presentation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,6 +21,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import ru.droidcat.core_ui.R
 import ru.droidcat.core_ui.components.buttons.FoodyaFilledButton
 import ru.droidcat.core_ui.components.buttons.FoodyaOutlinedButton
+import ru.droidcat.core_ui.components.cards.RecipeCard
 import ru.droidcat.feature_main_screen_impl.ExpireFood
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,7 +55,7 @@ fun MainScreen(
                     }
                 }
             )
-        },
+        }
     ) { innerPadding ->
 
         LazyColumn(
@@ -60,7 +63,7 @@ fun MainScreen(
                 .fillMaxSize(),
             contentPadding = PaddingValues(
                 top = innerPadding.calculateTopPadding() + 24.dp,
-                bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding() + 56.dp,
+                bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding() + 96.dp,
                 start = WindowInsets.systemBars.asPaddingValues()
                     .calculateStartPadding(LocalLayoutDirection.current),
                 end = WindowInsets.systemBars.asPaddingValues()
@@ -92,25 +95,30 @@ fun MainScreen(
 
             // Recommended recipes
             item {
-                Text(
-                    modifier = Modifier
-                        .padding(
-                            horizontal = horizontal_padding
-                        ),
-                    text = "Рекомендуемые рецепты:",
-                    style = MaterialTheme.typography.titleLarge
-                )
+                AnimatedVisibility(
+                    visible = state.value.recipes.isNotEmpty(),
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .padding(
+                                horizontal = horizontal_padding
+                            ),
+                        text = "Рекомендуемые рецепты:",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
             }
 
             // Recipe cards
-            items(20) {
-                Text(
-                    modifier = Modifier
-                        .padding(
-                            horizontal = horizontal_padding
-                        ),
-                    text = "Карточки рецептов",
-                    style = MaterialTheme.typography.titleLarge
+            items(state.value.recipes) { recipe ->
+                RecipeCard(
+                    modifier = Modifier.padding(horizontal = horizontal_padding),
+                    recipeName = recipe.name,
+                    servings = recipe.servings,
+                    weight = recipe.weight,
+                    recipeImageUrl = recipe.imageUrl
                 )
             }
         }

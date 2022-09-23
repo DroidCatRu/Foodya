@@ -17,7 +17,8 @@ class MainScreenViewModel @Inject constructor(
     private val getUserNameUseCase: GetUserNameUseCase,
     private val getUserHydrationUseCase: GetUserHydrationUseCase,
     private val addWaterUseCase: AddWaterUseCase,
-    private val decreaseWaterUseCase: DecreaseWaterUseCase
+    private val decreaseWaterUseCase: DecreaseWaterUseCase,
+    private val getRecommendedRecipesUseCase: GetRecommendedRecipesUseCase
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow(MainScreenState())
@@ -25,10 +26,12 @@ class MainScreenViewModel @Inject constructor(
 
     private var getNameJob: Job? = null
     private var getHydrationJob: Job? = null
+    private var getRecipesJob: Job? = null
 
     init {
         getUserName()
         getHydration()
+        getRecipes()
     }
 
     fun addWater() {
@@ -65,9 +68,20 @@ class MainScreenViewModel @Inject constructor(
 
         }
     }
+
+    private fun getRecipes() {
+        getRecipesJob?.cancel()
+        getRecipesJob = scope.launch {
+            val recipes = getRecommendedRecipesUseCase()
+            if (recipes != null && recipes.isNotEmpty()) {
+                _screenState.value = _screenState.value.copy(recipes = recipes)
+            }
+        }
+    }
 }
 
 data class MainScreenState(
     val userName: String = "\u2588\u2588\u2588\u2588\u2588\u2588",
-    val hydration: Hydration? = null
+    val hydration: Hydration? = null,
+    val recipes: List<Recipe> = listOf()
 )

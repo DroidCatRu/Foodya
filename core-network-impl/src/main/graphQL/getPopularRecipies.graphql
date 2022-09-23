@@ -6,6 +6,8 @@ query getPopularRecipes {
             databaseId
             name
             mainImage
+            serving
+            weightInGrams
           }
         }
     }

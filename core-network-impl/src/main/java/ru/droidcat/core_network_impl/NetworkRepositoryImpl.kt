@@ -222,6 +222,8 @@ class NetworkRepositoryImpl @Inject constructor(
                             singleMeal.getJSONObject("recipe").getString("databaseId"),
                             singleMeal.getJSONObject("recipe").getString("name"),
                             singleMeal.getJSONObject("recipe").getString("mainImage"),
+                            singleMeal.getJSONObject("recipe").getInt("serving"),
+                            singleMeal.getJSONObject("recipe").getDouble("weightInGrams").toFloat()
                         )
                     )
                 )
@@ -256,7 +258,9 @@ class NetworkRepositoryImpl @Inject constructor(
                         singleRecipe.getString("id"),
                         singleRecipe.getString("databaseId"),
                         singleRecipe.getString("name"),
-                        singleRecipe.getString("mainImage")
+                        singleRecipe.getString("mainImage"),
+                        singleRecipe.getInt("serving"),
+                        singleRecipe.getDouble("weightInGrams").toFloat()
                     )
                 )
             }
@@ -290,7 +294,9 @@ class NetworkRepositoryImpl @Inject constructor(
                         singleRecipe.getString("id"),
                         singleRecipe.getString("databaseId"),
                         singleRecipe.getString("name"),
-                        singleRecipe.getString("mainImage")
+                        singleRecipe.getString("mainImage"),
+                        singleRecipe.getInt("serving"),
+                        singleRecipe.getDouble("weightInGrams").toFloat()
                     )
                 )
             }
@@ -318,6 +324,8 @@ class NetworkRepositoryImpl @Inject constructor(
                 jsonObject.getString("databaseId"),
                 jsonObject.getString("name"),
                 jsonObject.getString("mainImage"),
+                jsonObject.getInt("serving"),
+                jsonObject.getDouble("weightInGrams").toFloat(),
                 jsonObject.getString("totalTime"),
                 linesFromJsonArray(jsonObject.getJSONArray("ingredientLines")),
                 linesFromJsonArray(jsonObject.getJSONArray("instructions"))

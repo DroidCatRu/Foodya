@@ -4,5 +4,7 @@ data class RecipeBasic(
     override val id: String,
     override val databaseId: String,
     override val name: String,
-    override val mainImage: String
+    override val mainImage: String,
+    override val servings: Int,
+    override val weightInGrams: Float
 ) : Recipe()
