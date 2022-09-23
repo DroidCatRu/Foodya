@@ -15,6 +15,7 @@ interface NavigationCommand {
     val configuration: NavOptions
         get() = NavOptions.Builder()
             .setLaunchSingleTop(true)
+            .setRestoreState(true)
             .build()
 }
 

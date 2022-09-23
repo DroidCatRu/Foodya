@@ -17,7 +17,8 @@ fun NavigationHost(
     NavHost(
         modifier = modifier,
         navController = navController,
-        startDestination = OnboardingDestination.destination
+        startDestination = OnboardingDestination.destination,
+        route = "RootNavigationRoute"
     ) {
         factories.forEach {
             it.create(this)
