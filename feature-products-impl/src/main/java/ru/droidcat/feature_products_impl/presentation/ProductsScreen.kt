@@ -43,7 +43,7 @@ fun ProductsScreen() {
             horizontalArrangement = spacedBy(8.dp),
             contentPadding = PaddingValues(
                 top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding() + 16.dp,
-                bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding() + 80.dp,
+                bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding() + 168.dp,
                 start = 16.dp,
                 end = 16.dp
             )
