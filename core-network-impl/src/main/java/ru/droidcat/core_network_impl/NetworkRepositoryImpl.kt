@@ -176,19 +176,21 @@ class NetworkRepositoryImpl @Inject constructor(
             .query(GetHydrationQuery(date))
             .execute()
 
-        if (result.data != null) {
+        val hydrationJson = result.data?.hydration
 
-            val hydrationJsonObject = result.data?.hydration?.get(0) ?: return null
+        return if (hydrationJson != null && hydrationJson.isNotEmpty()) {
 
-            return HydrationInfo(
-                    hydrationJsonObject.isToday ?: false,
-                    hydrationJsonObject.quantity ?: 0,
-                    hydrationJsonObject.date as String? ?: "",
-                    hydrationJsonObject.goal ?: 0
+            val hydrationJsonObject = hydrationJson[0]
+
+            HydrationInfo(
+                hydrationJsonObject.isToday ?: false,
+                hydrationJsonObject.quantity ?: 0,
+                hydrationJsonObject.date as String? ?: "",
+                hydrationJsonObject.goal ?: 0
             )
 
         } else {
-            return null
+            null
         }
 
     }
@@ -502,8 +504,8 @@ class NetworkRepositoryImpl @Inject constructor(
                 profileWithoutName.dailyCaloricIntakeGoal,
                 profileWithoutName.restrictions
                     ?.stream()
-                    ?.map {
-                        it -> Restriction(it!!.id, it.name!!)
+                    ?.map { it ->
+                        Restriction(it!!.id, it.name!!)
                     }
                     ?.toList()
             )

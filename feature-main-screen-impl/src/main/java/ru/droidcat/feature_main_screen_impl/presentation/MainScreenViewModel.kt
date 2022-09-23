@@ -8,44 +8,66 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import ru.droidcat.core_utils.IoScope
-import ru.droidcat.feature_main_screen_api.usecase.GetUserNameUseCase
+import ru.droidcat.feature_main_screen_api.usecase.*
 import javax.inject.Inject
 
 @HiltViewModel
 class MainScreenViewModel @Inject constructor(
     @IoScope private val scope: CoroutineScope,
-    private val getUserNameUseCase: GetUserNameUseCase
+    private val getUserNameUseCase: GetUserNameUseCase,
+    private val getUserHydrationUseCase: GetUserHydrationUseCase,
+    private val addWaterUseCase: AddWaterUseCase,
+    private val decreaseWaterUseCase: DecreaseWaterUseCase
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow(MainScreenState())
     val screenState: StateFlow<MainScreenState> = _screenState
 
     private var getNameJob: Job? = null
+    private var getHydrationJob: Job? = null
 
     init {
         getUserName()
+        getHydration()
     }
 
     fun addWater() {
-
+        scope.launch {
+            addWaterUseCase()
+            getHydration()
+        }
     }
 
     fun decreaseWater() {
-
+        scope.launch {
+            decreaseWaterUseCase()
+            getHydration()
+        }
     }
 
     private fun getUserName() {
         getNameJob?.cancel()
         getNameJob = scope.launch {
-            val nameFromNet = getUserNameUseCase()
-            if (!nameFromNet.isNullOrBlank()) {
-                _screenState.value = _screenState.value.copy(userName = nameFromNet)
+            val name = getUserNameUseCase()
+            if (!name.isNullOrBlank()) {
+                _screenState.value = _screenState.value.copy(userName = name)
             }
-//            _screenState.value = _screenState.value.copy(userName = "Артем")
+        }
+    }
+
+    private fun getHydration() {
+        getHydrationJob?.cancel()
+        getHydrationJob = scope.launch {
+            val hydration = getUserHydrationUseCase()
+            if (hydration != null) {
+                _screenState.value = _screenState.value.copy(hydration = hydration)
+            }
+
         }
     }
 }
 
 data class MainScreenState(
-    val userName: String = "\u2588\u2588\u2588\u2588\u2588\u2588"
+    val userName: String = "\u2588\u2588\u2588\u2588\u2588\u2588",
+    val hydration: Hydration? = null
 )

@@ -1,5 +1,6 @@
 package ru.droidcat.feature_main_screen_impl.presentation
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -15,6 +17,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.droidcat.core_ui.R
+import ru.droidcat.core_ui.components.buttons.FoodyaFilledButton
+import ru.droidcat.core_ui.components.buttons.FoodyaOutlinedButton
 import ru.droidcat.feature_main_screen_impl.ExpireFood
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,15 +82,12 @@ fun MainScreen(
 
             // Water balance
             item {
-                Text(
-                    modifier = Modifier
-                        .padding(
-                            horizontal = horizontal_padding
-                        ),
-                    text = "Водный баланс:",
-                    style = MaterialTheme.typography.titleLarge
+                WaterBlock(
+                    waterIntake = state.value.hydration?.intake ?: 0f,
+                    waterGoal = state.value.hydration?.goal ?: 0f,
+                    onAddClick = { viewModel.addWater() },
+                    onDecreaseClick = { viewModel.decreaseWater() }
                 )
-                Spacer(modifier = Modifier.height(64.dp))
             }
 
             // Recommended recipes
@@ -174,7 +175,50 @@ fun WaterBlock(
     onAddClick: (() -> Unit)? = null,
     onDecreaseClick: (() -> Unit)? = null
 ) {
-
+    Column(
+        verticalArrangement = spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            modifier = Modifier
+                .padding(
+                    horizontal = horizontal_padding
+                )
+                .fillMaxWidth(),
+            text = "Водный баланс:",
+            style = MaterialTheme.typography.titleLarge
+        )
+        Text(
+            modifier = Modifier
+                .padding(
+                    horizontal = horizontal_padding
+                ),
+            text = "${waterIntake}л/${waterGoal}л",
+            style = MaterialTheme.typography.headlineLarge
+        )
+        Row(
+            modifier = Modifier
+                .padding(
+                    horizontal = horizontal_padding
+                )
+                .fillMaxWidth(),
+            horizontalArrangement = spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            FoodyaOutlinedButton(
+                modifier = Modifier.weight(0.5f),
+                onClick = { onDecreaseClick?.invoke() }
+            ) {
+                Text("Убавить")
+            }
+            FoodyaFilledButton(
+                modifier = Modifier.weight(0.5f),
+                onClick = { onAddClick?.invoke() }
+            ) {
+                Text("Добавить")
+            }
+        }
+    }
 }
 
 private val horizontal_padding = 16.dp

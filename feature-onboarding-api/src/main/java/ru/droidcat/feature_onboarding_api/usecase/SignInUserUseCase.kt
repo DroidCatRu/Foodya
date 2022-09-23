@@ -20,8 +20,11 @@ class SignInUserUseCase @Inject constructor(
             return SignResults.ERROR.UNKNOWN
         }
 
+        val userId = (networkResult as MutationResult.SUCCESS).data.toString()
+        val userData = networkRepository.getUserProfile(userId) ?: return SignResults.ERROR.UNKNOWN
+
         val dbResult =
-            dbRepository.saveUserDatabaseId((networkResult as MutationResult.SUCCESS).data.toString())
+            dbRepository.saveUserDatabaseId(userId) && dbRepository.saveUserName(userData.name)
 
         if (!dbResult) {
             return SignResults.ERROR.DB.WRITE_ERROR
