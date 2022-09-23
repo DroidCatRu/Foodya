@@ -11,6 +11,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import ru.droidcat.core_network_api.MutationResult
 import ru.droidcat.core_network_api.NetworkRepository
+import ru.droidcat.core_network_api.hydration.HydrationAction
 import ru.droidcat.core_network_api.hydration.HydrationInfo
 import ru.droidcat.core_network_api.meal.Meal
 import ru.droidcat.core_network_api.meal.MealType
@@ -19,6 +20,7 @@ import ru.droidcat.core_network_api.recipe.RecipeFull
 import ru.droidcat.core_network_api.users.Restriction
 import ru.droidcat.core_network_api.users.UserData
 import ru.droidcat.core_network_api.users.UserGender
+import ru.droidcat.core_network_impl.type.ActionType
 import ru.droidcat.core_network_impl.type.ActivityLevel
 import ru.droidcat.core_network_impl.type.BiologicalSex
 import ru.droidcat.core_network_impl.type.WeeklyWeightGoal
@@ -384,10 +386,13 @@ class NetworkRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateUserHydration(databaseId: String, date: String): MutationResult {
+    override suspend fun updateUserHydration(databaseId: String, date: String, action: HydrationAction): MutationResult {
 
         val result = NetworkService.getInstance()!!.getApolloClientWithUserID(databaseId)
-            .mutation(UpdateHydrationMutation(date))
+            .mutation(UpdateHydrationMutation(
+                date,
+                if (action == HydrationAction.INCREASE) ActionType.INCREASE else ActionType.DECREASE)
+            )
             .execute()
 
         if (result.data != null) {

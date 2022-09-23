@@ -1,5 +1,6 @@
 package ru.droidcat.core_network_api
 
+import ru.droidcat.core_network_api.hydration.HydrationAction
 import ru.droidcat.core_network_api.hydration.HydrationInfo
 import ru.droidcat.core_network_api.meal.Meal
 import ru.droidcat.core_network_api.recipe.RecipeBasic
@@ -60,7 +61,7 @@ interface NetworkRepository {
 
     suspend fun removeUserMealPlan(databaseId: String): MutationResult
 
-    suspend fun updateUserHydration(databaseId: String, date: String): MutationResult
+    suspend fun updateUserHydration(databaseId: String, date: String, action: HydrationAction): MutationResult
 
     suspend fun updateMealPlan(databaseId: String, calories: Int): MutationResult
 

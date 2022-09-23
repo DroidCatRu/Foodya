@@ -1,7 +1,7 @@
-mutation updateHydration ($date: Date!){
+mutation updateHydration ($date: Date!, $action: ActionType!){
   updateHydration(
     date: $date
-    action: INCREASE
+    action: $action
   ) {
     success
     message
