@@ -24,6 +24,10 @@
             <option value="$PROJECT_DIR$/feature-main-screen-impl" />
             <option value="$PROJECT_DIR$/feature-onboarding-api" />
             <option value="$PROJECT_DIR$/feature-onboarding-impl" />
+            <option value="$PROJECT_DIR$/feature-products-api" />
+            <option value="$PROJECT_DIR$/feature-products-impl" />
+            <option value="$PROJECT_DIR$/feature-recipes-api" />
+            <option value="$PROJECT_DIR$/feature-recipes-impl" />
           </set>
         </option>
       </GradleProjectSettings>

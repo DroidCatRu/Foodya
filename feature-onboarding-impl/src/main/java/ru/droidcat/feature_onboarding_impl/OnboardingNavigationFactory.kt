@@ -3,10 +3,7 @@ package ru.droidcat.feature_onboarding_impl
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import ru.droidcat.core_navigation.NavigationCommand
-import ru.droidcat.core_navigation.NavigationDestination
-import ru.droidcat.core_navigation.NavigationFactory
-import ru.droidcat.core_navigation.NavigationManager
+import ru.droidcat.core_navigation.*
 import ru.droidcat.core_utils.FeatureIntentManager
 import ru.droidcat.feature_onboarding_impl.presentation.OnboardingGreetingScreen
 import ru.droidcat.feature_onboarding_impl.presentation.OnboardingSignInScreen
@@ -50,3 +47,11 @@ object OnboardingSignIn : NavigationCommand {
 object OnboardingSignUp : NavigationCommand {
     override val destination = "onboardingSignUp"
 }
+
+object OnboardingNavigationFeatureDestinations : FeatureDestinations(
+    destinations = listOf(
+        OnboardingGreeting.destination,
+        OnboardingSignIn.destination,
+        OnboardingSignUp.destination
+    )
+)
