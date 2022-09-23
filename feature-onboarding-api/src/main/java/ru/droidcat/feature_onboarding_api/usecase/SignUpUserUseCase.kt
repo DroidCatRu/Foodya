@@ -35,8 +35,11 @@ class SignUpUserUseCase @Inject constructor(
             }
         }
 
+
+
         val dbResult =
             dbRepository.saveUserDatabaseId((networkResult as MutationResult.SUCCESS).data.toString())
+                    && dbRepository.saveUserName(userName = name)
 
         return if (dbResult) SignResults.SUCCESS else SignResults.ERROR.DB.WRITE_ERROR
     }

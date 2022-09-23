@@ -14,6 +14,10 @@ interface DatabaseRepository {
 
     suspend fun getUserDatabaseId(): String?
 
+    suspend fun saveUserName(userName: String):Boolean
+
+    suspend fun getUserName(): String?
+
     suspend fun clearUserDatabaseId(): Boolean
 
 

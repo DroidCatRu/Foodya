@@ -17,6 +17,7 @@ class DatabaseRepositoryImpl @Inject constructor(
 ) : DatabaseRepository {
 
     private val USER_ID_KEY = "USER_ID_KEY"
+    private val USER_NAME_KEY = "USER_NAME_KEY"
 
     override suspend fun saveUserDatabaseId(databaseId: String): Boolean {
         return sharedPref
@@ -27,6 +28,17 @@ class DatabaseRepositoryImpl @Inject constructor(
 
     override suspend fun getUserDatabaseId(): String? {
         return sharedPref.getString(USER_ID_KEY, null)
+    }
+
+    override suspend fun saveUserName(userName: String): Boolean {
+        return sharedPref
+            .edit()
+            .putString(USER_NAME_KEY, userName)
+            .commit()
+    }
+
+    override suspend fun getUserName(): String? {
+        return sharedPref.getString(USER_NAME_KEY, null)
     }
 
     override suspend fun clearUserDatabaseId(): Boolean {
